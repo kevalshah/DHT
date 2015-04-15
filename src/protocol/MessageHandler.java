@@ -96,7 +96,7 @@ public class MessageHandler implements Runnable {
 
             case RequestCodes.SHUTDOWN:
                 System.out.println("SHUTDOWN Message received");
-                packetToSend = SHUTDOWNHandler.handleSHUTDOWNRequest(incomingPacket);
+                SHUTDOWNHandler.handleSHUTDOWNRequest(incomingPacket);
                 break;
 
             case RequestCodes.JOIN_REQ:
@@ -151,8 +151,7 @@ public class MessageHandler implements Runnable {
             try {
                 packetToSend = handleMessage();
             } catch(Exception e) {
-                // Build error message
-
+                e.printStackTrace();
             }
             if(packetToSend != null) {
                 UDPSend.sendPacket(packetToSend);

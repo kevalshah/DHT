@@ -6,12 +6,14 @@ import command.RequestCodes;
 import command.ResponseCodes;
 import main.Server;
 import message.Header;
+import message.InvalidMessageException;
 import message.Message;
 import message.Payload;
 import nodelist.Node;
 import nodelist.NodeListController;
 import utility.NodeSerializerUtility;
 
+import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketTimeoutException;
@@ -44,31 +46,41 @@ public class JoinInitiator implements Runnable {
             byte[] payload = buildNewJoinRequestPayload();
             while(true) {
 
+                DatagramSocket socket = null;
                 if(!isJoined && Server.contactNodeAddress != null && Server.contactNodePort >= 0) {
-                    DatagramSocket socket = new DatagramSocket();
-                    socket.setSoTimeout(15000);
-                    byte[] header = Header.buildMessageHeader();
-                    byte[] message = Message.buildMessage(header, payload);
-                    DatagramPacket packet = new DatagramPacket(message, message.length, Server.contactNodeAddress, Server.contactNodePort);
-                    byte[] receiveBuffer = new byte[17000];
-                    DatagramPacket receivePacket = new DatagramPacket(receiveBuffer, receiveBuffer.length);
-
                     try {
-                        socket.send(packet);
-                        socket.receive(receivePacket);
-                        byte[] data = receivePacket.getData();
-                        byte[] extractedHeader = Message.extractHeader(data);
-                        byte[] extractedPayload = Message.extractPayload(data);
+                        socket = new DatagramSocket();
+                        socket.setSoTimeout(15000);
+                        byte[] header = Header.buildMessageHeader();
+                        byte[] message = Message.buildMessage(header, payload);
+                        DatagramPacket packet = new DatagramPacket(message, message.length, Server.contactNodeAddress, Server.contactNodePort);
+                        byte[] receiveBuffer = new byte[17000];
+                        DatagramPacket receivePacket = new DatagramPacket(receiveBuffer, receiveBuffer.length);
 
-                        // Compare unique IDs
-                        if(Arrays.equals(header, extractedHeader)) {
-                            if(extractedPayload[0] == ResponseCodes.JOIN_REP) {
-                                JOINHandler.handleJOINResponse(receivePacket);
+                        try {
+                            socket.send(packet);
+                            socket.receive(receivePacket);
+                            byte[] data = receivePacket.getData();
+                            byte[] extractedHeader = Message.extractHeader(data);
+                            byte[] extractedPayload = Message.extractPayload(data);
+
+                            // Compare unique IDs
+                            if(Arrays.equals(header, extractedHeader)) {
+                                if(extractedPayload[0] == ResponseCodes.JOIN_REP) {
+                                    System.out.println("Join Response message received");
+                                    JOINHandler.handleJOINResponse(receivePacket);
+                                }
                             }
+
+                        } catch(SocketTimeoutException e) {
+
                         }
+                    } catch(Exception e) {
 
-                    } catch(SocketTimeoutException e) {
-
+                    } finally {
+                        if(socket != null) {
+                            socket.close();
+                        }
                     }
                 }
 

@@ -224,10 +224,10 @@ public class NodeListController {
     public void setSuccessorList(ArrayList<Node> successorList) {
         successorListLock.writeLock().lock();
 
-        if(successorList.size() > 0) {
-            this.successorList = new ArrayList<Node>();
-            int length = successorList.size() > MAX_SUCCESSOR_LIST_LENGTH ? MAX_SUCCESSOR_LIST_LENGTH : successorList.size();
-            for(int i = 0; i < length; i++) {
+        this.successorList = new ArrayList<Node>();
+        int length = successorList.size() > MAX_SUCCESSOR_LIST_LENGTH ? MAX_SUCCESSOR_LIST_LENGTH : successorList.size();
+        for(int i = 0; i < length; i++) {
+            if(successorList.get(i).getId() != self.getId()) {
                 this.successorList.add(new Node(successorList.get(i)));
             }
         }

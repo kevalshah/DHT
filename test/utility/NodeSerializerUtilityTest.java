@@ -42,4 +42,21 @@ public class NodeSerializerUtilityTest {
         System.out.println(serializedNodeList.length);
         assertTrue(serializedNodeList.length <= 17000);
     }
+
+
+    @Test
+    public void testSerializeAndDeserializeNodeWithNullIP() throws Exception {
+        ArrayList<Node> nodeList = new ArrayList<Node>();
+        Node node = new Node(null, -1, -1);
+        nodeList.add(node);
+
+        byte[] serialized = NodeSerializerUtility.serializeNodeList(nodeList);
+
+        ArrayList<Node> deserializedList = NodeSerializerUtility.deserialize(serialized);
+        Node receivedNode = deserializedList.get(0);
+        assertEquals(null, receivedNode.getHostname());
+        assertEquals(-1, receivedNode.getReceivingPort());
+        assertEquals(-1, receivedNode.getId());
+
+    }
 }

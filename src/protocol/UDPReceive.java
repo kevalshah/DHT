@@ -37,10 +37,10 @@ public class UDPReceive implements Runnable {
                 DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
                 socket.receive(receivePacket);
 
-                // Print packet source information
-                InetAddress IPAddress = receivePacket.getAddress();
-                int port = receivePacket.getPort();
-                System.out.println("RECEIVED Packet: " + IPAddress.getHostName() + ":" + port);
+//                // Print packet source information
+//                InetAddress IPAddress = receivePacket.getAddress();
+//                int port = receivePacket.getPort();
+//                System.out.println("RECEIVED Packet: " + IPAddress.getHostName() + ":" + port);
 
                 // Start new message handler thread
                 Thread messageHandlerThread = new Thread(new MessageHandler(receivePacket));

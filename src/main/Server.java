@@ -3,6 +3,8 @@ package main;
 import nodelist.Node;
 import nodelist.NodeListController;
 import protocol.JoinInitiator;
+import protocol.PredecessorCheckInitiator;
+import protocol.SuccessorCheckInitiator;
 import protocol.UDPReceive;
 import utility.HashUtility;
 
@@ -85,8 +87,18 @@ public class Server {
 
         // Create join initiator thread and scheduler for it
         JoinInitiator joinInitiatorThread = new JoinInitiator();
-        ScheduledExecutorService JoinInitiatorScheduler = Executors.newScheduledThreadPool(1);
-        final ScheduledFuture<?> joinInitiatorHandle = JoinInitiatorScheduler.scheduleWithFixedDelay(joinInitiatorThread, 0, 10, TimeUnit.MILLISECONDS);
+        ScheduledExecutorService joinInitiatorScheduler = Executors.newScheduledThreadPool(1);
+        final ScheduledFuture<?> joinInitiatorHandle = joinInitiatorScheduler.scheduleWithFixedDelay(joinInitiatorThread, 0, 10, TimeUnit.MILLISECONDS);
+
+        // Create predecessor check initiator thread and scheduler for it
+        PredecessorCheckInitiator predecessorCheckInitiatorThread = new PredecessorCheckInitiator();
+        ScheduledExecutorService predecessorCheckInitiatorScheduler = Executors.newScheduledThreadPool(1);
+        final ScheduledFuture<?> predecessorCheckInitiatorHandle = predecessorCheckInitiatorScheduler.scheduleWithFixedDelay(predecessorCheckInitiatorThread, 0, 10, TimeUnit.MILLISECONDS);
+
+        // Create successor check initiator thread and scheduler for it
+        SuccessorCheckInitiator successorCheckInitiatorThread = new SuccessorCheckInitiator();
+        ScheduledExecutorService successorCheckInitiatorScheduler = Executors.newScheduledThreadPool(1);
+        final ScheduledFuture<?> successorCheckInitiatorHandle = successorCheckInitiatorScheduler.scheduleWithFixedDelay(successorCheckInitiatorThread, 0, 10, TimeUnit.MILLISECONDS);
 
     }
 

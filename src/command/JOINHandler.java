@@ -88,6 +88,7 @@ public class JOINHandler {
                 else {
                     // Add joining node as predecessor
                     nlc.setPredecessor(joiningNode);
+                    JoinInitiator.isJoined = true;
 
                     // Prepare join response packet
                     byte[] succListToSend = NodeSerializerUtility.serializeNodeList(nlc.getSuccessorListWithSelf());
@@ -117,6 +118,7 @@ public class JOINHandler {
                         if(potentialIMSID == self.getId()) {
                             // Add joining node as predecessor
                             nlc.setPredecessor(joiningNode);
+                            JoinInitiator.isJoined = true;
 
                             // Prepare join response packet
                             byte[] succListToSend = NodeSerializerUtility.serializeNodeList(nlc.getSuccessorListWithSelf());
@@ -128,6 +130,17 @@ public class JOINHandler {
                             if(!hasHadPreviousJoinRequest) {
                                 nlc.addFirstSuccessor(joiningNode);
                                 hasHadPreviousJoinRequest = true;
+                            }
+                        } else {
+                            // Prepare potential ims packet to send to potential ims node
+                            Node potentialIMS = nlc.getNodeByID(potentialIMSID);
+                            if(potentialIMS != null) {
+                                byte[] newPayload = Payload.buildForwardingRequestPayload(RequestCodes.POTENTIAL_IMS_JOIN, joiningNode.getHostname(), incomingPacket.getPort(), payload);
+                                byte[] newMessage = Message.buildMessage(header, newPayload);
+                                packetToSend = new DatagramPacket(newMessage, newMessage.length, potentialIMS.getHostname(), potentialIMS.getReceivingPort());
+                            } else {
+                                // Drop packet
+                                return null;
                             }
                         }
                     } catch(NoPotentialIMSException e) {
@@ -153,9 +166,9 @@ public class JOINHandler {
             }
 
         } catch(InvalidMessageException e) {
-
+            e.printStackTrace();
         } catch(BadValueLengthException e) {
-
+            e.printStackTrace();
         }
 
         return packetToSend;
@@ -248,6 +261,7 @@ public class JOINHandler {
                         if(potentialIMSID == self.getId()) {
                             // Add joining node as predecessor
                             nlc.setPredecessor(joiningNode);
+                            JoinInitiator.isJoined = true;
 
                             // Prepare join response packet
                             byte[] succListToSend = NodeSerializerUtility.serializeNodeList(nlc.getSuccessorListWithSelf());
@@ -259,6 +273,17 @@ public class JOINHandler {
                             if(!hasHadPreviousJoinRequest) {
                                 nlc.addFirstSuccessor(joiningNode);
                                 hasHadPreviousJoinRequest = true;
+                            }
+                        } else {
+                            // Prepare potential ims packet to send to potential ims node
+                            Node potentialIMS = nlc.getNodeByID(potentialIMSID);
+                            if(potentialIMS != null) {
+                                byte[] newPayload = Payload.buildForwardingRequestPayload(RequestCodes.POTENTIAL_IMS_JOIN, joiningNode.getHostname(), port, actualPayload);
+                                byte[] newMessage = Message.buildMessage(header, newPayload);
+                                packetToSend = new DatagramPacket(newMessage, newMessage.length, potentialIMS.getHostname(), potentialIMS.getReceivingPort());
+                            } else {
+                                // Drop packet
+                                return null;
                             }
                         }
 
@@ -285,9 +310,9 @@ public class JOINHandler {
             }
 
         } catch(InvalidMessageException e) {
-
+            e.printStackTrace();
         } catch(BadValueLengthException e) {
-
+            e.printStackTrace();
         }
 
         return packetToSend;
@@ -349,6 +374,7 @@ public class JOINHandler {
                     if(ImmediateSuccessorRouter.isSelfPotentialIMS(joiningNodeID, predecessor.getId(), self.getId())) {
                         // Add joining node as predecessor
                         nlc.setPredecessor(joiningNode);
+                        JoinInitiator.isJoined = true;
 
                         // Prepare join response packet
                         byte[] succListToSend = NodeSerializerUtility.serializeNodeList(nlc.getSuccessorListWithSelf());
@@ -376,9 +402,9 @@ public class JOINHandler {
             }
 
         } catch(InvalidMessageException e) {
-
+            e.printStackTrace();
         } catch(BadValueLengthException e) {
-
+            e.printStackTrace();
         }
 
         return packetToSend;
@@ -413,9 +439,9 @@ public class JOINHandler {
             JoinInitiator.isJoined = true;
 
         } catch(InvalidMessageException e) {
-
+            e.printStackTrace();
         } catch(BadValueLengthException e) {
-
+            e.printStackTrace();
         }
     }
 

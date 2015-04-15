@@ -16,7 +16,7 @@ public class UDPSend {
 
             // Only send packet if not null
             if(packetToSend != null) {
-                System.out.println("Sending packet to " + packetToSend.getAddress() + ":" + packetToSend.getPort());
+//                System.out.println("Sending packet to " + packetToSend.getAddress() + ":" + packetToSend.getPort());
                 socket.send(packetToSend);
             }
 
