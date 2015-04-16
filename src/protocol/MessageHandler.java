@@ -35,92 +35,92 @@ public class MessageHandler implements Runnable {
         byte command = payload[0];
         switch(command) {
             case RequestCodes.GET:
-                System.out.println("GET message received");
+//                System.out.println("GET message received");
                 packetToSend = GETHandler.handleClientGET(incomingPacket);
                 break;
 
             case RequestCodes.FWD_GET:
-                System.out.println("Forward GET message received");
+//                System.out.println("Forward GET message received");
                 packetToSend = GETHandler.handleForwardGET(incomingPacket);
                 break;
 
             case RequestCodes.POTENTIAL_IMS_GET:
-                System.out.println("Potential IMS GET message received");
+//                System.out.println("Potential IMS GET message received");
                 packetToSend = GETHandler.handlePotentialIMSGET(incomingPacket);
                 break;
 
             case RequestCodes.REPLICA_GET:
-                System.out.println("Replica GET message received");
+//                System.out.println("Replica GET message received");
                 packetToSend = GETHandler.handleReplicaGET(incomingPacket);
                 break;
 
             case RequestCodes.PUT:
-                System.out.println("PUT message received");
+//                System.out.println("PUT message received");
                 packetToSend = PUTHandler.handleClientPUT(incomingPacket);
                 break;
 
             case RequestCodes.FWD_PUT:
-                System.out.println("Forward PUT message received");
+//                System.out.println("Forward PUT message received");
                 packetToSend = PUTHandler.handleForwardPUT(incomingPacket);
                 break;
 
             case RequestCodes.POTENTIAL_IMS_PUT:
-                System.out.println("Potential IMS PUT message received");
+//                System.out.println("Potential IMS PUT message received");
                 packetToSend = PUTHandler.handlePotentialIMSPUT(incomingPacket);
                 break;
 
             case RequestCodes.REPLICA_PUT:
-                System.out.println("Replica PUT message received");
+//                System.out.println("Replica PUT message received");
                 packetToSend = PUTHandler.handleReplicaPUT(incomingPacket);
                 break;
 
             case RequestCodes.REMOVE:
-                System.out.println("REMOVE message received");
+//                System.out.println("REMOVE message received");
                 packetToSend = REMOVEHandler.handleClientREMOVE(incomingPacket);
                 break;
 
             case RequestCodes.FWD_REMOVE:
-                System.out.println("Forward REMOVE message received");
+//                System.out.println("Forward REMOVE message received");
                 packetToSend = REMOVEHandler.handleForwardREMOVE(incomingPacket);
                 break;
 
             case RequestCodes.POTENTIAL_IMS_REMOVE:
-                System.out.println("Potential IMS REMOVE message received");
+//                System.out.println("Potential IMS REMOVE message received");
                 packetToSend = REMOVEHandler.handlePotentialIMSREMOVE(incomingPacket);
                 break;
 
             case RequestCodes.REPLICA_REMOVE:
-                System.out.println("Replica REMOVE message received");
+//                System.out.println("Replica REMOVE message received");
                 packetToSend = REMOVEHandler.handleReplicaREMOVE(incomingPacket);
                 break;
 
             case RequestCodes.SHUTDOWN:
-                System.out.println("SHUTDOWN Message received");
+//                System.out.println("SHUTDOWN Message received");
                 SHUTDOWNHandler.handleSHUTDOWNRequest(incomingPacket);
                 break;
 
             case RequestCodes.JOIN_REQ:
-                System.out.println("JOIN REQUEST message received");
+//                System.out.println("JOIN REQUEST message received");
                 packetToSend = JOINHandler.handleJOINRequest(incomingPacket);
                 break;
 
             case RequestCodes.FWD_JOIN:
-                System.out.println("Forward JOIN REQUEST message received");
+//                System.out.println("Forward JOIN REQUEST message received");
                 packetToSend = JOINHandler.handleForwardJOINRequest(incomingPacket);
                 break;
 
             case RequestCodes.POTENTIAL_IMS_JOIN:
-                System.out.println("Potential IMS JOIN REQUEST message received");
+//                System.out.println("Potential IMS JOIN REQUEST message received");
                 packetToSend = JOINHandler.handlePotentialImsJOINRequest(incomingPacket);
                 break;
 
             case RequestCodes.NODE_LIST_REQUEST:
-                System.out.println("NODE LIST REQUEST message received");
+//                System.out.println("NODE LIST REQUEST message received");
                 packetToSend = NODELISTHandler.handleNODELISTRequest(incomingPacket);
                 break;
 
             case RequestCodes.POTENTIAL_IMPS_UPDATE:
-                System.out.println("POTENTIAL IMPS UPDATE message received");
+//                System.out.println("POTENTIAL IMPS UPDATE message received");
                 CHECKALIVEHandler.handlePotentialPredecessorUpdate(incomingPacket);
                 break;
 
@@ -133,7 +133,7 @@ public class MessageHandler implements Runnable {
                 break;
 
             default:
-                System.out.println("Unknown message received");
+//                System.out.println("Unknown message received");
                 packetToSend = handleUNKNOWN();
                 break;
         }

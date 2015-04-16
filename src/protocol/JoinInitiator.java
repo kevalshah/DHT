@@ -42,7 +42,7 @@ public class JoinInitiator implements Runnable {
     public void run() {
         try {
             System.out.println("Join Initiator is now running");
-            NodeListController.getInstance().printView();
+//            NodeListController.getInstance().printView();
             byte[] payload = buildNewJoinRequestPayload();
             while(true) {
 
@@ -67,7 +67,7 @@ public class JoinInitiator implements Runnable {
                             // Compare unique IDs
                             if(Arrays.equals(header, extractedHeader)) {
                                 if(extractedPayload[0] == ResponseCodes.JOIN_REP) {
-                                    System.out.println("Join Response message received");
+//                                    System.out.println("Join Response message received");
                                     JOINHandler.handleJOINResponse(receivePacket);
                                 }
                             }
@@ -85,7 +85,7 @@ public class JoinInitiator implements Runnable {
                 }
 
                 Thread.sleep(5000);
-                NodeListController.getInstance().printView();
+//                NodeListController.getInstance().printView();
 
             }
         } catch(Exception e) {

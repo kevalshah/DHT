@@ -37,30 +37,39 @@ public class Logger {
             switch(responseCode) {
                 case ResponseCodes.OPERATION_SUCCESS:
                     System.out.println("Response: OPERATION SUCCESS");
+                    System.out.println();
                     break;
                 case ResponseCodes.UNRECOGNIZED_COMMAND:
                     System.out.println("Response: UNRECOGNIZED COMMAND");
+                    System.out.println();
                     break;
                 case ResponseCodes.OUT_OF_SPACE:
                     System.out.println("Response: OUT OF SPACE");
+                    System.out.println();
                     break;
                 case ResponseCodes.SYSTEM_OVERLOAD:
                     System.out.println("Response: SYSTEM OVERLOAD");
+                    System.out.println();
                     break;
                 case ResponseCodes.INTERNAL_KVSTORE_FAILURE:
                     System.out.println("Response: INTERNAL KV STORE FAILURE");
+                    System.out.println();
                     break;
                 case ResponseCodes.CANNOT_SHUTDOWN:
                     System.out.println("Response: CANNOT SHUTDOWN");
+                    System.out.println();
                     break;
                 case ResponseCodes.NON_EXISTENT_KEY:
                     System.out.println("Response: NON EXISTENT KEY");
+                    System.out.println();
                     break;
                 case ResponseCodes.BAD_VALUE_LENGTH:
                     System.out.println("Response: BAD VALUE LENGTH");
+                    System.out.println();
                     break;
                 case ResponseCodes.NODE_LIST_RESPONSE:
                     System.out.println("Response: NODE LIST RESPONSE");
+                    System.out.println();
                     try {
                         byte[] nodeList = Payload.getPayloadElement(Payload.Element.NODE_LIST, payload);
                         ArrayList<Node> nodes = NodeSerializerUtility.deserialize(nodeList);

@@ -1,1 +1,5 @@
-planetlab4.williams.edu
+planetlab2.csee.usf.edu
+pl-node-1.csl.sri.com
+planetlab1.cs.du.edu
+planetlab2.cs.otago.ac.nz
+planetlab3.mini.pw.edu.pl

@@ -25,7 +25,7 @@ public class JOINHandler {
      * @param incomingPacket - Incoming packet
      * @return
      */
-    public static DatagramPacket handleJOINRequest(DatagramPacket incomingPacket) {
+    public static synchronized DatagramPacket handleJOINRequest(DatagramPacket incomingPacket) {
 
         // Extract header and payload
         byte[] message = incomingPacket.getData();
@@ -180,7 +180,7 @@ public class JOINHandler {
      * @param incomingPacket - Incoming packet
      * @return
      */
-    public static DatagramPacket handleForwardJOINRequest(DatagramPacket incomingPacket) {
+    public static synchronized DatagramPacket handleForwardJOINRequest(DatagramPacket incomingPacket) {
         // Extract header and payload
         byte[] message = incomingPacket.getData();
         byte[] header = Message.extractHeader(message);
@@ -324,7 +324,7 @@ public class JOINHandler {
      * @param incomingPacket - Incoming packet
      * @return
      */
-    public static DatagramPacket handlePotentialImsJOINRequest(DatagramPacket incomingPacket) {
+    public static synchronized DatagramPacket handlePotentialImsJOINRequest(DatagramPacket incomingPacket) {
         // Extract header and payload
         byte[] message = incomingPacket.getData();
         byte[] header = Message.extractHeader(message);
