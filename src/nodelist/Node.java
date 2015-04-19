@@ -82,7 +82,7 @@ public class Node implements Serializable {
     @Override
     public String toString() {
         String returnString = "";
-        returnString += (hostname == null ? "-" : hostname.getHostName()) + ":" + receivingPort;
+        returnString += (hostname == null ? "null" : hostname.getHostName() + ":" + receivingPort);
         returnString += " ID: " + (id >= 0 ? id : "-");
         return returnString;
     }

@@ -10,7 +10,7 @@ import message.Message;
 import message.Payload;
 import nodelist.Node;
 import nodelist.NodeListController;
-import timestamp.CheckAliveTimestamp;
+import timestamp.Timestamp;
 import utility.HashUtility;
 import utility.UTF8StringUtility;
 
@@ -86,7 +86,7 @@ public class GETHandler {
                 }
                 // CASE 2) Null predecessor and empty successor list
                 else {
-                    CheckAliveTimestamp timestamp = CheckAliveTimestamp.getInstance();
+                    Timestamp timestamp = Timestamp.getInstance();
                     if(self.getId() == keyRequestID) {// || (timestamp.getPredecessorCheckTimestamp() == null && timestamp.getSuccessorCheckTimestamp() == null)) {
                         // Search local kvstore
                         packetToSend = performGetOperation(key, header, incomingPacket.getAddress(),

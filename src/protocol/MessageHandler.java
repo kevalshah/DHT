@@ -71,7 +71,7 @@ public class MessageHandler implements Runnable {
 
             case RequestCodes.REPLICA_PUT:
 //                System.out.println("Replica PUT message received");
-                packetToSend = PUTHandler.handleReplicaPUT(incomingPacket);
+                PUTHandler.handleReplicaPUT(incomingPacket);
                 break;
 
             case RequestCodes.REMOVE:
@@ -91,7 +91,7 @@ public class MessageHandler implements Runnable {
 
             case RequestCodes.REPLICA_REMOVE:
 //                System.out.println("Replica REMOVE message received");
-                packetToSend = REMOVEHandler.handleReplicaREMOVE(incomingPacket);
+                REMOVEHandler.handleReplicaREMOVE(incomingPacket);
                 break;
 
             case RequestCodes.SHUTDOWN:

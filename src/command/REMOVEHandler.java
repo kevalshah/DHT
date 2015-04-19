@@ -10,7 +10,7 @@ import message.Message;
 import message.Payload;
 import nodelist.Node;
 import nodelist.NodeListController;
-import timestamp.CheckAliveTimestamp;
+import timestamp.Timestamp;
 import utility.HashUtility;
 import utility.UTF8StringUtility;
 
@@ -88,8 +88,8 @@ public class REMOVEHandler {
                 }
                 // CASE 2) Null predecessor and empty successor list
                 else {
-                    CheckAliveTimestamp timestamp = CheckAliveTimestamp.getInstance();
-                    if(self.getId() == keyRequestID || (timestamp.getPredecessorCheckTimestamp() == null && timestamp.getSuccessorCheckTimestamp() == null)) {
+                    Timestamp timestamp = Timestamp.getInstance();
+                    if(self.getId() == keyRequestID) {// || (timestamp.getPredecessorCheckTimestamp() == null && timestamp.getSuccessorCheckTimestamp() == null)) {
                         // Perform remove operation on local kvstore
                         packetToSend = performRemoveOperation(key, header, incomingPacket.getAddress(), incomingPacket.getPort());
                     } else {
@@ -297,13 +297,20 @@ public class REMOVEHandler {
      * @param incomingPacket - Incoming packet
      * @return
      */
-    public static DatagramPacket handleReplicaREMOVE(DatagramPacket incomingPacket) {
-        DatagramPacket packetToSend = null;
+    public static void handleReplicaREMOVE(DatagramPacket incomingPacket) {
+        byte[] message = incomingPacket.getData();
+        byte[] payload = Message.extractPayload(message);
 
+        try {
+            // Get key from payload
+            String key = UTF8StringUtility.bytesUTF8ToString(Payload.getPayloadElement(Payload.Element.KEY, payload));
 
+            // Perform a remove operation
+            performRemoveOperation(key, null, null, -1);
 
-
-        return packetToSend;
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
     }
 
 

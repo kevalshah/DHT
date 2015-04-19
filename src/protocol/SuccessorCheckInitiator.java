@@ -38,7 +38,7 @@ public class SuccessorCheckInitiator implements Runnable {
                     boolean aliveReply = false;
                     try {
                         socket = new DatagramSocket();
-                        socket.setSoTimeout(3000);
+                        socket.setSoTimeout(1000);
                         byte[] header = Header.buildMessageHeader();
                         byte[] message = Message.buildMessage(header, payload);
                         DatagramPacket packet = new DatagramPacket(message, message.length, firstSuccessor.getHostname(), firstSuccessor.getReceivingPort());

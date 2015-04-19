@@ -17,7 +17,6 @@ cs-planetlab4.cs.surrey.sfu.ca
 saturn.planetlab.carleton.ca
 salt.planetlab.cs.umd.edu
 ricepl-5.cs.rice.edu
-ricepl-2.cs.rice.edu
 pluto.cs.brown.edu
 plonk.cs.uwaterloo.ca
 plnode-04.gpolab.bbn.com
@@ -42,7 +41,6 @@ planetlab4.cs.uoregon.edu
 planetlab3.williams.edu
 planetlab3.wail.wisc.edu
 planetlab3.ucsd.edu
-planetlab3.rutgers.edu
 node1.planetlab.mathcs.emory.edu
 node2.planetlab.mathcs.emory.edu
 planetlab3.cs.uoregon.edu
@@ -54,7 +52,6 @@ planetlab2.unr.edu
 planetlab2.unl.edu
 planetlab2.ucsd.edu
 pl1.cs.montana.edu
-planetlab2.rutgers.edu
 pl1.cs.yale.edu
 pl1.eecs.utk.edu
 planetlab2.pop-mg.rnp.br
@@ -73,8 +70,6 @@ planetlab2.cti.espol.edu.ec
 planetlab2.cs.uoregon.edu
 planetlab2.cs.unc.edu
 planetlab2.cs.uml.edu
-planetlab2.cs.ucla.edu
-planetlab2.cs.purdue.edu
 planetlab2.cs.colorado.edu
 planetlab2.cqupt.edu.cn
 planetlab2.comp.nus.edu.sg
@@ -87,7 +82,6 @@ planetlab1.unr.edu
 planetlab1.unl.edu
 plab3.cs.msu.ru
 plab3.eece.ksu.edu
-planetlab1.rutgers.edu
 plab4.eece.ksu.edu
 planet-lab1.cs.ucr.edu
 planetlab1.pop-mg.rnp.br
@@ -124,7 +118,6 @@ planetlab2.tsuniv.edu
 node1.planetlab.albany.edu
 planetlab02.cs.washington.edu
 planetlab1.eecs.umich.edu
-planetlab3.comp.nus.edu.sg
 planetlab1.ucsd.edu
 planetlab-js1.cert.org.cn
 planetlab-2.ssvl.kth.se

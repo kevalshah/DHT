@@ -1,5 +1,7 @@
 package nodelist;
 
+import message.Payload;
+
 import java.util.ArrayList;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -75,6 +77,43 @@ public class NodeListController {
     }
 
 
+
+    public void removePredecessor(Node predecessorToRemove) {
+        Node currentPredecessor = getPredecessor();
+
+        // Only remove predecessor if current predecessor is equal to predecessor to remove
+        if(predecessorToRemove != null && predecessorToRemove.equals(currentPredecessor)) {
+            predecessorLock.writeLock().lock();
+            setPredecessor(null);
+            predecessorLock.writeLock().unlock();
+
+            RemovedNodeList removedNodeList = RemovedNodeList.getInstance();
+            if(removedNodeList.isNodeInRemovedList(predecessorToRemove)) {
+                // removed node is in removed node list so reset that instance's timestamp
+                removedNodeList.removeNodeFromList(predecessorToRemove);
+                removedNodeList.addRemovedNode(predecessorToRemove);
+            } else {
+                removedNodeList.addRemovedNode(predecessorToRemove);
+            }
+
+            // Search if removed predecessor is in successor list, if so, remove it.
+            successorListLock.writeLock().lock();
+            try {
+                for(Node node : this.successorList) {
+                    if(node.equals(predecessorToRemove)) {
+                        this.successorList.remove(node);
+                    }
+                }
+            } finally {
+                successorListLock.writeLock().unlock();
+            }
+
+        }
+
+
+    }
+
+
     /**
      * Gets node that represents self
      * @return
@@ -138,6 +177,7 @@ public class NodeListController {
             successorListLock.readLock().unlock();
         }
     }
+
 
 
     /**
@@ -224,11 +264,19 @@ public class NodeListController {
     public void setSuccessorList(ArrayList<Node> successorList) {
         successorListLock.writeLock().lock();
 
+        RemovedNodeList removedNodeList = RemovedNodeList.getInstance();
+
         this.successorList = new ArrayList<Node>();
         int length = successorList.size() > MAX_SUCCESSOR_LIST_LENGTH ? MAX_SUCCESSOR_LIST_LENGTH : successorList.size();
         for(int i = 0; i < length; i++) {
             if(successorList.get(i).getId() != self.getId()) {
-                this.successorList.add(new Node(successorList.get(i)));
+                if(removedNodeList.isNodeInRemovedList(successorList.get(i))) {
+                    if(removedNodeList.isTimestampExpiredForNode(successorList.get(i))) {
+                        this.successorList.add(new Node(successorList.get(i)));
+                    }
+                } else {
+                    this.successorList.add(new Node(successorList.get(i)));
+                }
             }
         }
 
@@ -293,11 +341,12 @@ public class NodeListController {
      */
     public void removeFirstSuccessor() {
         int firstSuccessorID = -1;
+        Node removedNode = null;
 
         successorListLock.writeLock().lock();
         if (successorList.size() > 0){
             firstSuccessorID = successorList.get(0).getId();
-            successorList.remove(0);
+            removedNode = successorList.remove(0);
         }
         successorListLock.writeLock().unlock();
 
@@ -306,6 +355,18 @@ public class NodeListController {
             predecessor = null;
         }
         predecessorLock.writeLock().unlock();
+
+        RemovedNodeList removedNodeList = RemovedNodeList.getInstance();
+        if(removedNode != null) {
+
+            if(removedNodeList.isNodeInRemovedList(removedNode)) {
+                // removed node is in removed node list so reset that instance's timestamp
+                removedNodeList.removeNodeFromList(removedNode);
+                removedNodeList.addRemovedNode(removedNode);
+            } else {
+                removedNodeList.addRemovedNode(removedNode);
+            }
+        }
     }
 
 

@@ -11,7 +11,7 @@ import message.Message;
 import message.Payload;
 import nodelist.Node;
 import nodelist.NodeListController;
-import timestamp.CheckAliveTimestamp;
+import timestamp.Timestamp;
 import utility.HashUtility;
 import utility.UTF8StringUtility;
 
@@ -91,8 +91,8 @@ public class PUTHandler {
                 }
                 // CASE 2) Null predecessor and empty successor list
                 else {
-                    CheckAliveTimestamp timestamp = CheckAliveTimestamp.getInstance();
-                    if(self.getId() == keyRequestID || (timestamp.getPredecessorCheckTimestamp() == null && timestamp.getSuccessorCheckTimestamp() == null)) {
+                    Timestamp timestamp = Timestamp.getInstance();
+                    if(self.getId() == keyRequestID) { // || (timestamp.getPredecessorCheckTimestamp() == null && timestamp.getSuccessorCheckTimestamp() == null)) {
                         // Perform put operation on local kvstore
                         packetToSend = performPutOperation(key, value, header, incomingPacket.getAddress(), incomingPacket.getPort());
                     } else {
@@ -304,13 +304,25 @@ public class PUTHandler {
      * @param incomingPacket - Incoming packet
      * @return
      */
-    public static DatagramPacket handleReplicaPUT(DatagramPacket incomingPacket) {
-        DatagramPacket packetToSend = null;
+    public static void handleReplicaPUT(DatagramPacket incomingPacket) {
+        byte[] message = incomingPacket.getData();
+        byte[] payload = Message.extractPayload(message);
+
+        try {
+            // Get key from payload
+            String key = UTF8StringUtility.bytesUTF8ToString(Payload.getPayloadElement(Payload.Element.KEY, payload));
+
+            // Get value from payload
+            String value = UTF8StringUtility.bytesUTF8ToString(Payload.getPayloadElement(Payload.Element.REQUEST_VALUE, payload));
+
+            // Perform a put operation
+            performPutOperation(key, value, null, null, -1);
 
 
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
 
-
-        return packetToSend;
     }
 
 

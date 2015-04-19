@@ -1,5 +1,6 @@
 package command;
 
+import algorithm.ImmediateSuccessorRouter;
 import message.*;
 import nodelist.Node;
 import nodelist.NodeListController;
@@ -162,10 +163,17 @@ public class CHECKALIVEHandler {
 
             Node potentialPredecessor = list.get(0);
             Node predecessor = nlc.getPredecessor();
+            Node self = nlc.getSelf();
 
-            // Only update predecessor if predecessor is set to null
+            // Update predecessor if predecessor is set to null
             if(predecessor == null) {
                 nlc.setPredecessor(potentialPredecessor);
+            }
+            // Update predecessor if potential predecessor's ims is self
+            else {
+                if(ImmediateSuccessorRouter.isSelfPotentialIMS(potentialPredecessor.getId(), predecessor.getId(), self.getId())) {
+                    nlc.setPredecessor(potentialPredecessor);
+                }
             }
 
         } catch(InvalidMessageException e) {

@@ -8,6 +8,7 @@ import message.Message;
 import message.Payload;
 import nodelist.Node;
 import nodelist.NodeListController;
+import nodelist.RemovedNodeList;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -37,7 +38,7 @@ public class PredecessorCheckInitiator implements Runnable {
                     boolean aliveReply = false;
                     try {
                         socket = new DatagramSocket();
-                        socket.setSoTimeout(3000);
+                        socket.setSoTimeout(1000);
                         byte[] header = Header.buildMessageHeader();
                         byte[] message = Message.buildMessage(header, payload);
                         DatagramPacket packet = new DatagramPacket(message, message.length, predecessor.getHostname(), predecessor.getReceivingPort());
@@ -72,7 +73,7 @@ public class PredecessorCheckInitiator implements Runnable {
 
                         if(!aliveReply) {
                             System.out.println("Removing predecessor");
-                            nlc.setPredecessor(null);
+                            nlc.removePredecessor(predecessor);
                         }
 
                     } catch(Exception e) {
