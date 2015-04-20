@@ -17,7 +17,9 @@ public class Payload {
         COMMAND, KEY, REQUEST_VALUE_LENGTH,
         REQUEST_VALUE, RESPONSE_VALUE_LENGTH,
         RESPONSE_VALUE, IP_ADDRESS, PORT,
-        ACTUAL_PAYLOAD_LENGTH, ACTUAL_PAYLOAD,
+        CLIENT_IP_ADDRESS, CLIENT_PORT,
+        REGULAR_FORWARD_PAYLOAD_LENGTH, REGULAR_FORWARD_PAYLOAD,
+        CLIENT_FORWARD_PAYLOAD_LENGTH, CLIENT_FORWARD_PAYLOAD,
         NODE_LIST_LENGTH, NODE_LIST
     }
 
@@ -43,12 +45,21 @@ public class Payload {
     public final static int RESPONSE_VALUE_LENGTH_START_INDEX = RESPONSE_CODE_START_INDEX + COMMAND_CODE_SIZE_BYTES;
     public final static int RESPONSE_VALUE_START_INDEX = RESPONSE_VALUE_LENGTH_START_INDEX + VALUE_LENGTH_SIZE_BYTES;
 
-    // Start indexes - Forwarding Request payload
-    public final static int FORWARDING_REQUEST_START_INDEX = 0;
-    public final static int IP_START_INDEX = FORWARDING_REQUEST_START_INDEX + COMMAND_CODE_SIZE_BYTES;
-    public final static int PORT_START_INDEX = IP_START_INDEX + IP_SIZE_BYTES;
-    public final static int ACTUAL_PAYLOAD_LENGTH_START_INDEX = PORT_START_INDEX + PORT_SIZE_BYTES;
-    public final static int ACTUAL_PAYLOAD_START_INDEX = ACTUAL_PAYLOAD_LENGTH_START_INDEX + ACTUAL_PAYLOAD_LENGTH_SIZE_BYTES;
+    // Start indexes - Forwarding messages (includes client IP:Port and return node IP:Port)
+    public final static int CLIENT_FORWARD_REQUEST_START_INDEX = 0;
+    public final static int CLIENT_FORWARD_RETURN_IP_START_INDEX = CLIENT_FORWARD_REQUEST_START_INDEX + COMMAND_CODE_SIZE_BYTES;
+    public final static int CLIENT_FORWARD_RETURN_PORT_START_INDEX = CLIENT_FORWARD_RETURN_IP_START_INDEX + IP_SIZE_BYTES;
+    public final static int CLIENT_FORWARD_CLIENT_IP_START_INDEX = CLIENT_FORWARD_RETURN_PORT_START_INDEX + PORT_SIZE_BYTES;
+    public final static int CLIENT_FORWARD_CLIENT_PORT_START_INDEX = CLIENT_FORWARD_CLIENT_IP_START_INDEX + IP_SIZE_BYTES;
+    public final static int CLIENT_FORWARD_PAYLOAD_LENGTH_START_INDEX = CLIENT_FORWARD_CLIENT_PORT_START_INDEX + PORT_SIZE_BYTES;
+    public final static int CLIENT_FORWARD_PAYLOAD_START_INDEX = CLIENT_FORWARD_PAYLOAD_LENGTH_START_INDEX + ACTUAL_PAYLOAD_LENGTH_SIZE_BYTES;
+
+    // Start indexes - Forwarding messages (includes return node IP:Port)
+    public final static int REGULAR_FORWARD_REQUEST_START_INDEX = 0;
+    public final static int REGULAR_FORWARD_RETURN_IP_START_INDEX = REGULAR_FORWARD_REQUEST_START_INDEX + COMMAND_CODE_SIZE_BYTES;
+    public final static int REGULAR_FORWARD_RETURN_PORT_START_INDEX = REGULAR_FORWARD_RETURN_IP_START_INDEX + IP_SIZE_BYTES;
+    public final static int REGULAR_FORWARD_PAYLOAD_LENGTH_START_INDEX = REGULAR_FORWARD_RETURN_PORT_START_INDEX + PORT_SIZE_BYTES;
+    public final static int REGULAR_FORWARD_PAYLOAD_START_INDEX = REGULAR_FORWARD_PAYLOAD_LENGTH_START_INDEX + ACTUAL_PAYLOAD_LENGTH_SIZE_BYTES;
 
     // Start indexes - Check Alive/Join Request and Response payload
     public final static int CHK_ALIVE_OR_JOIN_COMMAND_START_INDEX = 0;
@@ -130,28 +141,63 @@ public class Payload {
     /**
      * Builds a request payload for forwarding requests (GET, PUT, or REMOVE)
      * @param requestCode - Request code
-     * @param address - IP of original sender (typically a client)
-     * @param port - Receiving port of original sender (typically a client)
+     * @param returnAddress - IP of original sender (typically a client)
+     * @param returnPort - Receiving port of original sender (typically a client)
      * @param requestPayloadToForward - Request payload to forward
      * @return - Byte array representing payload
      */
-    public static byte[] buildForwardingRequestPayload(byte requestCode, InetAddress address, int port, byte[] requestPayloadToForward) {
+    public static byte[] buildForwardingRequestPayload(byte requestCode, InetAddress returnAddress, int returnPort, byte[] requestPayloadToForward) {
         byte[] requestPayload = new byte[COMMAND_CODE_SIZE_BYTES + IP_SIZE_BYTES + PORT_SIZE_BYTES + ACTUAL_PAYLOAD_LENGTH_SIZE_BYTES + requestPayloadToForward.length];
         // Add request code
         requestPayload[0] = requestCode;
         // Add IP
-        byte[] ipAsBytes = address.getAddress();
-        System.arraycopy(ipAsBytes, 0, requestPayload, IP_START_INDEX, IP_SIZE_BYTES);
+        byte[] ipAsBytes = returnAddress.getAddress();
+        System.arraycopy(ipAsBytes, 0, requestPayload, REGULAR_FORWARD_RETURN_IP_START_INDEX, IP_SIZE_BYTES);
         // Add request payload to forward
-        System.arraycopy(requestPayloadToForward, 0, requestPayload, ACTUAL_PAYLOAD_START_INDEX, requestPayloadToForward.length);
+        System.arraycopy(requestPayloadToForward, 0, requestPayload, REGULAR_FORWARD_PAYLOAD_START_INDEX, requestPayloadToForward.length);
         // Add request payload length and port
         int valueLength = requestPayloadToForward.length;
         ByteBuffer buffer = ByteBuffer.wrap(requestPayload);
         buffer.order(ByteOrder.LITTLE_ENDIAN);
-        buffer.putInt(ACTUAL_PAYLOAD_LENGTH_START_INDEX, valueLength);
-        buffer.putInt(PORT_START_INDEX, port);
+        buffer.putInt(REGULAR_FORWARD_PAYLOAD_LENGTH_START_INDEX, valueLength);
+        buffer.putInt(REGULAR_FORWARD_RETURN_PORT_START_INDEX, returnPort);
         return buffer.array();
     }
+
+
+    /**
+     * Builds a client forwarding request payload
+     * @param requestCode
+     * @param returnAddress
+     * @param returnPort
+     * @param clientAddress
+     * @param clientPort
+     * @param requestPayloadToForward
+     * @return
+     */
+    public static byte[] buildClientForwardingRequestPayload(byte requestCode, InetAddress returnAddress, int returnPort, InetAddress clientAddress, int clientPort, byte[] requestPayloadToForward) {
+        byte[] requestPayload = new byte[COMMAND_CODE_SIZE_BYTES + IP_SIZE_BYTES + PORT_SIZE_BYTES + IP_SIZE_BYTES + PORT_SIZE_BYTES + ACTUAL_PAYLOAD_LENGTH_SIZE_BYTES + requestPayloadToForward.length];
+        // Add request code
+        requestPayload[0] = requestCode;
+        // Add return IP
+        byte[] ipAsBytes = returnAddress.getAddress();
+        System.arraycopy(ipAsBytes, 0, requestPayload, CLIENT_FORWARD_RETURN_IP_START_INDEX, IP_SIZE_BYTES);
+        // Add client IP
+        byte[] clientIPAsBytes = clientAddress.getAddress();
+        System.arraycopy(clientIPAsBytes, 0, requestPayload, CLIENT_FORWARD_CLIENT_IP_START_INDEX, IP_SIZE_BYTES);
+        // Add request payload to forward
+        System.arraycopy(requestPayloadToForward, 0, requestPayload, CLIENT_FORWARD_PAYLOAD_START_INDEX, requestPayloadToForward.length);
+        // Add request payload length, return port and client port
+        int valueLength = requestPayloadToForward.length;
+        ByteBuffer buffer = ByteBuffer.wrap(requestPayload);
+        buffer.order(ByteOrder.LITTLE_ENDIAN);
+        buffer.putInt(CLIENT_FORWARD_PAYLOAD_LENGTH_START_INDEX, valueLength);
+        buffer.putInt(CLIENT_FORWARD_RETURN_PORT_START_INDEX, returnPort);
+        buffer.putInt(CLIENT_FORWARD_CLIENT_PORT_START_INDEX, clientPort);
+        return buffer.array();
+    }
+
+
 
 
     /**
@@ -215,17 +261,30 @@ public class Payload {
                     elementToReturn = Arrays.copyOfRange(payload, RESPONSE_VALUE_START_INDEX, RESPONSE_VALUE_START_INDEX + responseValueLength);
                     break;
                 case IP_ADDRESS:
-                    elementToReturn = Arrays.copyOfRange(payload, IP_START_INDEX, IP_START_INDEX + IP_SIZE_BYTES);
+                    elementToReturn = Arrays.copyOfRange(payload, REGULAR_FORWARD_RETURN_IP_START_INDEX, REGULAR_FORWARD_RETURN_IP_START_INDEX + IP_SIZE_BYTES);
                     break;
                 case PORT:
-                    elementToReturn = Arrays.copyOfRange(payload, PORT_START_INDEX, PORT_START_INDEX + PORT_SIZE_BYTES);
+                    elementToReturn = Arrays.copyOfRange(payload, REGULAR_FORWARD_RETURN_PORT_START_INDEX, REGULAR_FORWARD_RETURN_PORT_START_INDEX + PORT_SIZE_BYTES);
                     break;
-                case ACTUAL_PAYLOAD_LENGTH:
-                    elementToReturn = Arrays.copyOfRange(payload, ACTUAL_PAYLOAD_LENGTH_START_INDEX, ACTUAL_PAYLOAD_LENGTH_START_INDEX + ACTUAL_PAYLOAD_LENGTH_SIZE_BYTES);
+                case CLIENT_IP_ADDRESS:
+                    elementToReturn = Arrays.copyOfRange(payload, CLIENT_FORWARD_CLIENT_IP_START_INDEX, CLIENT_FORWARD_CLIENT_IP_START_INDEX + IP_SIZE_BYTES);
                     break;
-                case ACTUAL_PAYLOAD:
-                    int actualPayloadLength = ByteBuffer.wrap(Arrays.copyOfRange(payload, ACTUAL_PAYLOAD_LENGTH_START_INDEX, ACTUAL_PAYLOAD_LENGTH_START_INDEX + ACTUAL_PAYLOAD_LENGTH_SIZE_BYTES)).order(ByteOrder.LITTLE_ENDIAN).getInt();
-                    elementToReturn = Arrays.copyOfRange(payload, ACTUAL_PAYLOAD_START_INDEX, ACTUAL_PAYLOAD_START_INDEX + actualPayloadLength);
+                case CLIENT_PORT:
+                    elementToReturn = Arrays.copyOfRange(payload, CLIENT_FORWARD_CLIENT_PORT_START_INDEX, CLIENT_FORWARD_CLIENT_PORT_START_INDEX + PORT_SIZE_BYTES);
+                    break;
+                case REGULAR_FORWARD_PAYLOAD_LENGTH:
+                    elementToReturn = Arrays.copyOfRange(payload, REGULAR_FORWARD_PAYLOAD_LENGTH_START_INDEX, REGULAR_FORWARD_PAYLOAD_LENGTH_START_INDEX + ACTUAL_PAYLOAD_LENGTH_SIZE_BYTES);
+                    break;
+                case REGULAR_FORWARD_PAYLOAD:
+                    int actualPayloadLength = ByteBuffer.wrap(Arrays.copyOfRange(payload, REGULAR_FORWARD_PAYLOAD_LENGTH_START_INDEX, REGULAR_FORWARD_PAYLOAD_LENGTH_START_INDEX + ACTUAL_PAYLOAD_LENGTH_SIZE_BYTES)).order(ByteOrder.LITTLE_ENDIAN).getInt();
+                    elementToReturn = Arrays.copyOfRange(payload, REGULAR_FORWARD_PAYLOAD_START_INDEX, REGULAR_FORWARD_PAYLOAD_START_INDEX + actualPayloadLength);
+                    break;
+                case CLIENT_FORWARD_PAYLOAD_LENGTH:
+                    elementToReturn = Arrays.copyOfRange(payload, CLIENT_FORWARD_PAYLOAD_LENGTH_START_INDEX, CLIENT_FORWARD_PAYLOAD_LENGTH_START_INDEX + ACTUAL_PAYLOAD_LENGTH_SIZE_BYTES);
+                    break;
+                case CLIENT_FORWARD_PAYLOAD:
+                    int clientPayloadLength = ByteBuffer.wrap(Arrays.copyOfRange(payload, CLIENT_FORWARD_PAYLOAD_LENGTH_START_INDEX, CLIENT_FORWARD_PAYLOAD_LENGTH_START_INDEX + ACTUAL_PAYLOAD_LENGTH_SIZE_BYTES)).order(ByteOrder.LITTLE_ENDIAN).getInt();
+                    elementToReturn = Arrays.copyOfRange(payload, CLIENT_FORWARD_PAYLOAD_START_INDEX, CLIENT_FORWARD_PAYLOAD_START_INDEX + clientPayloadLength);
                     break;
                 case NODE_LIST_LENGTH:
                     elementToReturn = Arrays.copyOfRange(payload, NODE_LIST_LENGTH_START_INDEX, NODE_LIST_LENGTH_START_INDEX + NODE_LIST_LENGTH_SIZE_BYTES);

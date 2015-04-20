@@ -401,7 +401,7 @@ public class PayloadTest {
         int port = 45000;
         byte[] payloadToForward = Payload.buildStandardRequestPayload(RequestCodes.REMOVE, new byte[32]);
         byte[] payload = Payload.buildForwardingRequestPayload(RequestCodes.FWD_REMOVE, ip, port, payloadToForward);
-        byte[] extractedActualPayloadLengthAsBytes = Payload.getPayloadElement(Payload.Element.ACTUAL_PAYLOAD_LENGTH, payload);
+        byte[] extractedActualPayloadLengthAsBytes = Payload.getPayloadElement(Payload.Element.REGULAR_FORWARD_PAYLOAD_LENGTH, payload);
         assertEquals(payloadToForward.length, ByteBuffer.wrap(extractedActualPayloadLengthAsBytes).order(ByteOrder.LITTLE_ENDIAN).getInt());
     }
 
@@ -412,7 +412,7 @@ public class PayloadTest {
         int port = 45000;
         byte[] payloadToForward = Payload.buildStandardRequestPayload(RequestCodes.REMOVE, new byte[32]);
         byte[] payload = Payload.buildForwardingRequestPayload(RequestCodes.FWD_REMOVE, ip, port, payloadToForward);
-        byte[] extractedActualPayload = Payload.getPayloadElement(Payload.Element.ACTUAL_PAYLOAD, payload);
+        byte[] extractedActualPayload = Payload.getPayloadElement(Payload.Element.REGULAR_FORWARD_PAYLOAD, payload);
         assertArrayEquals(payloadToForward, extractedActualPayload);
     }
 

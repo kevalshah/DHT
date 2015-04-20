@@ -192,7 +192,7 @@ public class JOINHandler {
         try {
             // Get actual payload
             int port = ByteBuffer.wrap(Payload.getPayloadElement(Payload.Element.PORT, payload)).order(ByteOrder.LITTLE_ENDIAN).getInt();
-            byte[] actualPayload = Payload.getPayloadElement(Payload.Element.ACTUAL_PAYLOAD, payload);
+            byte[] actualPayload = Payload.getPayloadElement(Payload.Element.REGULAR_FORWARD_PAYLOAD, payload);
 
             // Get joining node
             byte[] extractedNodeList = Payload.getPayloadElement(Payload.Element.NODE_LIST, actualPayload);
@@ -336,7 +336,7 @@ public class JOINHandler {
         try {
             // Get actual payload
             int port = ByteBuffer.wrap(Payload.getPayloadElement(Payload.Element.PORT, payload)).order(ByteOrder.LITTLE_ENDIAN).getInt();
-            byte[] actualPayload = Payload.getPayloadElement(Payload.Element.ACTUAL_PAYLOAD, payload);
+            byte[] actualPayload = Payload.getPayloadElement(Payload.Element.REGULAR_FORWARD_PAYLOAD, payload);
 
             // Get joining node
             byte[] extractedNodeList = Payload.getPayloadElement(Payload.Element.NODE_LIST, actualPayload);

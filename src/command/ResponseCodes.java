@@ -19,9 +19,10 @@ public class ResponseCodes {
     public final static byte SUCC_ALIVE_REP = 0x33;
     public final static byte CANNOT_SHUTDOWN = 0x34;
     public final static byte BAD_VALUE_LENGTH = 0x35;
+    public final static byte CLIENT_FWD_RESPONSE = 0x36;
 
     // This will be used for testing
-    public final static byte NODE_LIST_RESPONSE = 0x36;
+    public final static byte NODE_LIST_RESPONSE = 0x37;
 
     // Cannot be initialized
     private ResponseCodes() {}

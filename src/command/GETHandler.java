@@ -53,7 +53,7 @@ public class GETHandler {
 
                     if(self.getId() == keyRequestID) {
                         // Perform search in local kvstore
-                        packetToSend = performGetOperation(key, header, incomingPacket.getAddress(),
+                        packetToSend = performGetOperation(key, header, self.getHostname(), self.getReceivingPort(), incomingPacket.getAddress(),
                                 incomingPacket.getPort());
                     } else {
                         int successorList[] = nlc.getSuccessorListIDs();
@@ -62,24 +62,34 @@ public class GETHandler {
                             Node potentialIMS = nlc.getNodeByID(potentialIMSID);
                             if(potentialIMS != null) {
                                 // Prepare potential ims get packet
-                                byte[] newPayload = Payload.buildForwardingRequestPayload(RequestCodes.POTENTIAL_IMS_GET, incomingPacket.getAddress(), incomingPacket.getPort(), payload);
+                                byte[] newPayload = Payload.buildClientForwardingRequestPayload(
+                                        RequestCodes.POTENTIAL_IMS_GET, self.getHostname(), self.getReceivingPort(),
+                                        incomingPacket.getAddress(), incomingPacket.getPort(), payload);
                                 byte[] newMessage = Message.buildMessage(header, newPayload);
                                 packetToSend = new DatagramPacket(newMessage, newMessage.length, potentialIMS.getHostname(), potentialIMS.getReceivingPort());
                             } else {
-                                // Drop packet
-                                return null;
+                                // Build error packet
+                                byte[] stdPayload = Payload.buildPayloadWithOnlyCommand(ResponseCodes.INTERNAL_KVSTORE_FAILURE);
+                                byte[] newPayload = Payload.buildForwardingRequestPayload(ResponseCodes.CLIENT_FWD_RESPONSE, incomingPacket.getAddress(), incomingPacket.getPort(), stdPayload);
+                                byte[] newMessage = Message.buildMessage(header, newPayload);
+                                packetToSend = new DatagramPacket(newMessage, newMessage.length, self.getHostname(), self.getReceivingPort());
                             }
                         } catch(NoPotentialIMSException e) {
                             // Get last successor
                             Node lastSuccessor = nlc.getLastSuccessor();
                             if(lastSuccessor != null) {
                                 // Prepare forward get packet
-                                byte[] newPayload = Payload.buildForwardingRequestPayload(RequestCodes.FWD_GET, incomingPacket.getAddress(), incomingPacket.getPort(), payload);
+                                byte[] newPayload = Payload.buildClientForwardingRequestPayload(RequestCodes.FWD_GET,
+                                        self.getHostname(), self.getReceivingPort(), incomingPacket.getAddress(),
+                                        incomingPacket.getPort(), payload);
                                 byte[] newMessage = Message.buildMessage(header, newPayload);
                                 packetToSend = new DatagramPacket(newMessage, newMessage.length, lastSuccessor.getHostname(), lastSuccessor.getReceivingPort());
                             } else {
-                                // Drop packet
-                                return null;
+                                // Build error packet
+                                byte[] stdPayload = Payload.buildPayloadWithOnlyCommand(ResponseCodes.INTERNAL_KVSTORE_FAILURE);
+                                byte[] newPayload = Payload.buildForwardingRequestPayload(ResponseCodes.CLIENT_FWD_RESPONSE, incomingPacket.getAddress(), incomingPacket.getPort(), stdPayload);
+                                byte[] newMessage = Message.buildMessage(header, newPayload);
+                                packetToSend = new DatagramPacket(newMessage, newMessage.length, self.getHostname(), self.getReceivingPort());
                             }
                         }
                     }
@@ -89,7 +99,7 @@ public class GETHandler {
                     Timestamp timestamp = Timestamp.getInstance();
                     if(self.getId() == keyRequestID) {// || (timestamp.getPredecessorCheckTimestamp() == null && timestamp.getSuccessorCheckTimestamp() == null)) {
                         // Search local kvstore
-                        packetToSend = performGetOperation(key, header, incomingPacket.getAddress(),
+                        packetToSend = performGetOperation(key, header, self.getHostname(), self.getReceivingPort(), incomingPacket.getAddress(),
                                 incomingPacket.getPort());
                     } else {
 
@@ -106,7 +116,7 @@ public class GETHandler {
                     // iii) If potential ims found in successor list -> Send potential ims request to element
                     if(ImmediateSuccessorRouter.isSelfPotentialIMS(keyRequestID, predecessor.getId(), self.getId())) {
                         // Perform search in local kvstore
-                        packetToSend = performGetOperation(key, header, incomingPacket.getAddress(),
+                        packetToSend = performGetOperation(key, header, self.getHostname(), self.getReceivingPort(), incomingPacket.getAddress(),
                                 incomingPacket.getPort());
                     } else {
                         int successorList[] = nlc.getSuccessorListIDs();
@@ -115,32 +125,45 @@ public class GETHandler {
                             Node potentialIMS = nlc.getNodeByID(potentialIMSID);
                             if(potentialIMS != null) {
                                 // Prepare potential ims get packet
-                                byte[] newPayload = Payload.buildForwardingRequestPayload(RequestCodes.POTENTIAL_IMS_GET, incomingPacket.getAddress(), incomingPacket.getPort(), payload);
+                                byte[] newPayload = Payload.buildClientForwardingRequestPayload(
+                                        RequestCodes.POTENTIAL_IMS_GET, self.getHostname(), self.getReceivingPort(),
+                                        incomingPacket.getAddress(), incomingPacket.getPort(), payload);
                                 byte[] newMessage = Message.buildMessage(header, newPayload);
                                 packetToSend = new DatagramPacket(newMessage, newMessage.length, potentialIMS.getHostname(), potentialIMS.getReceivingPort());
                             } else {
-                                // Drop packet
-                                return null;
+                                // Build error packet
+                                byte[] stdPayload = Payload.buildPayloadWithOnlyCommand(ResponseCodes.INTERNAL_KVSTORE_FAILURE);
+                                byte[] newPayload = Payload.buildForwardingRequestPayload(ResponseCodes.CLIENT_FWD_RESPONSE, incomingPacket.getAddress(), incomingPacket.getPort(), stdPayload);
+                                byte[] newMessage = Message.buildMessage(header, newPayload);
+                                packetToSend = new DatagramPacket(newMessage, newMessage.length, self.getHostname(), self.getReceivingPort());
                             }
                         } catch(NoPotentialIMSException e) {
                             // Get last successor
                             Node lastSuccessor = nlc.getLastSuccessor();
                             if(lastSuccessor != null) {
                                 // Prepare forward get packet
-                                byte[] newPayload = Payload.buildForwardingRequestPayload(RequestCodes.FWD_GET, incomingPacket.getAddress(), incomingPacket.getPort(), payload);
+                                byte[] newPayload = Payload.buildClientForwardingRequestPayload(RequestCodes.FWD_GET,
+                                        self.getHostname(), self.getReceivingPort(), incomingPacket.getAddress(),
+                                        incomingPacket.getPort(), payload);
                                 byte[] newMessage = Message.buildMessage(header, newPayload);
                                 packetToSend = new DatagramPacket(newMessage, newMessage.length, lastSuccessor.getHostname(), lastSuccessor.getReceivingPort());
                             } else {
-                                // Drop packet
-                                return null;
+                                // Build error packet
+                                byte[] stdPayload = Payload.buildPayloadWithOnlyCommand(ResponseCodes.INTERNAL_KVSTORE_FAILURE);
+                                byte[] newPayload = Payload.buildForwardingRequestPayload(ResponseCodes.CLIENT_FWD_RESPONSE, incomingPacket.getAddress(), incomingPacket.getPort(), stdPayload);
+                                byte[] newMessage = Message.buildMessage(header, newPayload);
+                                packetToSend = new DatagramPacket(newMessage, newMessage.length, self.getHostname(), self.getReceivingPort());
                             }
                         }
                     }
                 }
                 // CASE 4) Predecessor set and empty successor list
                 else {
-                    // Drop packet
-                    return null;
+                    // Build error packet
+                    byte[] stdPayload = Payload.buildPayloadWithOnlyCommand(ResponseCodes.INTERNAL_KVSTORE_FAILURE);
+                    byte[] newPayload = Payload.buildForwardingRequestPayload(ResponseCodes.CLIENT_FWD_RESPONSE, incomingPacket.getAddress(), incomingPacket.getPort(), stdPayload);
+                    byte[] newMessage = Message.buildMessage(header, newPayload);
+                    packetToSend = new DatagramPacket(newMessage, newMessage.length, self.getHostname(), self.getReceivingPort());
                 }
             }
 
@@ -171,9 +194,12 @@ public class GETHandler {
 
         try {
             // Get actual payload
-            InetAddress clientAddress = InetAddress.getByAddress(Payload.getPayloadElement(Payload.Element.IP_ADDRESS, payload));
-            int clientPort = ByteBuffer.wrap(Payload.getPayloadElement(Payload.Element.PORT, payload)).order(ByteOrder.LITTLE_ENDIAN).getInt();
-            byte[] actualPayload = Payload.getPayloadElement(Payload.Element.ACTUAL_PAYLOAD, payload);
+            InetAddress returnAddress = InetAddress.getByAddress(Payload.getPayloadElement(Payload.Element.IP_ADDRESS, payload));
+            int returnPort = ByteBuffer.wrap(Payload.getPayloadElement(Payload.Element.PORT, payload)).order(ByteOrder.LITTLE_ENDIAN).getInt();
+            InetAddress clientAddress = InetAddress.getByAddress(
+                    Payload.getPayloadElement(Payload.Element.CLIENT_IP_ADDRESS, payload));
+            int clientPort = ByteBuffer.wrap(Payload.getPayloadElement(Payload.Element.CLIENT_PORT, payload)).order(ByteOrder.LITTLE_ENDIAN).getInt();
+            byte[] actualPayload = Payload.getPayloadElement(Payload.Element.CLIENT_FORWARD_PAYLOAD, payload);
 
             // Get key from payload
             byte[] keyAsBytes = Payload.getPayloadElement(Payload.Element.KEY, actualPayload);
@@ -193,7 +219,7 @@ public class GETHandler {
 
                     if(self.getId() == keyRequestID) {
                         // Perform search in local kvstore
-                        packetToSend = performGetOperation(key, header, clientAddress, clientPort);
+                        packetToSend = performGetOperation(key, header, returnAddress, returnPort, clientAddress, clientPort);
                     } else {
                         int successorList[] = nlc.getSuccessorListIDs();
                         try {
@@ -201,32 +227,44 @@ public class GETHandler {
                             Node potentialIMS = nlc.getNodeByID(potentialIMSID);
                             if(potentialIMS != null) {
                                 // Prepare potential ims get packet
-                                byte[] newPayload = Payload.buildForwardingRequestPayload(RequestCodes.POTENTIAL_IMS_GET, clientAddress, clientPort, actualPayload);
+                                byte[] newPayload = Payload.buildClientForwardingRequestPayload(
+                                        RequestCodes.POTENTIAL_IMS_GET, returnAddress, returnPort, clientAddress,
+                                        clientPort, actualPayload);
                                 byte[] newMessage = Message.buildMessage(header, newPayload);
                                 packetToSend = new DatagramPacket(newMessage, newMessage.length, potentialIMS.getHostname(), potentialIMS.getReceivingPort());
                             } else {
-                                // Drop packet
-                                return null;
+                                // Build error packet
+                                byte[] stdPayload = Payload.buildPayloadWithOnlyCommand(ResponseCodes.INTERNAL_KVSTORE_FAILURE);
+                                byte[] newPayload = Payload.buildForwardingRequestPayload(ResponseCodes.CLIENT_FWD_RESPONSE, clientAddress, clientPort, stdPayload);
+                                byte[] newMessage = Message.buildMessage(header, newPayload);
+                                packetToSend = new DatagramPacket(newMessage, newMessage.length, returnAddress, returnPort);
                             }
                         } catch(NoPotentialIMSException e) {
                             // Get last successor
                             Node lastSuccessor = nlc.getLastSuccessor();
                             if(lastSuccessor != null) {
                                 // Prepare forward get packet
-                                byte[] newPayload = Payload.buildForwardingRequestPayload(RequestCodes.FWD_GET, clientAddress, clientPort, actualPayload);
+                                byte[] newPayload = Payload.buildClientForwardingRequestPayload(RequestCodes.FWD_GET,
+                                        returnAddress, returnPort, clientAddress, clientPort, actualPayload);
                                 byte[] newMessage = Message.buildMessage(header, newPayload);
                                 packetToSend = new DatagramPacket(newMessage, newMessage.length, lastSuccessor.getHostname(), lastSuccessor.getReceivingPort());
                             } else {
-                                // Drop packet
-                                return null;
+                                // Build error packet
+                                byte[] stdPayload = Payload.buildPayloadWithOnlyCommand(ResponseCodes.INTERNAL_KVSTORE_FAILURE);
+                                byte[] newPayload = Payload.buildForwardingRequestPayload(ResponseCodes.CLIENT_FWD_RESPONSE, clientAddress, clientPort, stdPayload);
+                                byte[] newMessage = Message.buildMessage(header, newPayload);
+                                packetToSend = new DatagramPacket(newMessage, newMessage.length, returnAddress, returnPort);
                             }
                         }
                     }
                 }
                 // CASE 2) Null predecessor and empty successor list
                 else {
-                    // Drop packet
-                    return null;
+                    // Build error packet
+                    byte[] stdPayload = Payload.buildPayloadWithOnlyCommand(ResponseCodes.INTERNAL_KVSTORE_FAILURE);
+                    byte[] newPayload = Payload.buildForwardingRequestPayload(ResponseCodes.CLIENT_FWD_RESPONSE, clientAddress, clientPort, stdPayload);
+                    byte[] newMessage = Message.buildMessage(header, newPayload);
+                    packetToSend = new DatagramPacket(newMessage, newMessage.length, returnAddress, returnPort);
                 }
             }
             else {
@@ -238,7 +276,7 @@ public class GETHandler {
                     // iii) If potential ims found in successor list -> Send potential ims request to element
                     if(self.getId() == keyRequestID) {
                         // Perform search in local kvstore
-                        packetToSend = performGetOperation(key, header, clientAddress, clientPort);
+                        packetToSend = performGetOperation(key, header, returnAddress, returnPort, clientAddress, clientPort);
                     } else {
                         int successorList[] = nlc.getSuccessorListIDs();
                         try {
@@ -246,32 +284,44 @@ public class GETHandler {
                             Node potentialIMS = nlc.getNodeByID(potentialIMSID);
                             if(potentialIMS != null) {
                                 // Prepare potential ims get packet
-                                byte[] newPayload = Payload.buildForwardingRequestPayload(RequestCodes.POTENTIAL_IMS_GET, clientAddress, clientPort, actualPayload);
+                                byte[] newPayload = Payload.buildClientForwardingRequestPayload(
+                                        RequestCodes.POTENTIAL_IMS_GET, returnAddress, returnPort, clientAddress,
+                                        clientPort, actualPayload);
                                 byte[] newMessage = Message.buildMessage(header, newPayload);
                                 packetToSend = new DatagramPacket(newMessage, newMessage.length, potentialIMS.getHostname(), potentialIMS.getReceivingPort());
                             } else {
-                                // Drop packet
-                                return null;
+                                // Build error packet
+                                byte[] stdPayload = Payload.buildPayloadWithOnlyCommand(ResponseCodes.INTERNAL_KVSTORE_FAILURE);
+                                byte[] newPayload = Payload.buildForwardingRequestPayload(ResponseCodes.CLIENT_FWD_RESPONSE, clientAddress, clientPort, stdPayload);
+                                byte[] newMessage = Message.buildMessage(header, newPayload);
+                                packetToSend = new DatagramPacket(newMessage, newMessage.length, returnAddress, returnPort);
                             }
                         } catch(NoPotentialIMSException e) {
                             // Get last successor
                             Node lastSuccessor = nlc.getLastSuccessor();
                             if(lastSuccessor != null) {
                                 // Prepare forward get packet
-                                byte[] newPayload = Payload.buildForwardingRequestPayload(RequestCodes.FWD_GET, clientAddress, clientPort, actualPayload);
+                                byte[] newPayload = Payload.buildClientForwardingRequestPayload(RequestCodes.FWD_GET,
+                                        returnAddress, returnPort, clientAddress, clientPort, actualPayload);
                                 byte[] newMessage = Message.buildMessage(header, newPayload);
                                 packetToSend = new DatagramPacket(newMessage, newMessage.length, lastSuccessor.getHostname(), lastSuccessor.getReceivingPort());
                             } else {
-                                // Drop packet
-                                return null;
+                                // Build error packet
+                                byte[] stdPayload = Payload.buildPayloadWithOnlyCommand(ResponseCodes.INTERNAL_KVSTORE_FAILURE);
+                                byte[] newPayload = Payload.buildForwardingRequestPayload(ResponseCodes.CLIENT_FWD_RESPONSE, clientAddress, clientPort, stdPayload);
+                                byte[] newMessage = Message.buildMessage(header, newPayload);
+                                packetToSend = new DatagramPacket(newMessage, newMessage.length, returnAddress, returnPort);
                             }
                         }
                     }
                 }
                 // CASE 4) Predecessor set and empty successor list
                 else {
-                    // Drop packet
-                    return null;
+                    // Build error packet
+                    byte[] stdPayload = Payload.buildPayloadWithOnlyCommand(ResponseCodes.INTERNAL_KVSTORE_FAILURE);
+                    byte[] newPayload = Payload.buildForwardingRequestPayload(ResponseCodes.CLIENT_FWD_RESPONSE, clientAddress, clientPort, stdPayload);
+                    byte[] newMessage = Message.buildMessage(header, newPayload);
+                    packetToSend = new DatagramPacket(newMessage, newMessage.length, returnAddress, returnPort);
                 }
             }
 
@@ -321,9 +371,11 @@ public class GETHandler {
 
         try {
             // Get actual payload
-            InetAddress clientAddress = InetAddress.getByAddress(Payload.getPayloadElement(Payload.Element.IP_ADDRESS, payload));
-            int clientPort = ByteBuffer.wrap(Payload.getPayloadElement(Payload.Element.PORT, payload)).order(ByteOrder.LITTLE_ENDIAN).getInt();
-            byte[] actualPayload = Payload.getPayloadElement(Payload.Element.ACTUAL_PAYLOAD, payload);
+            InetAddress returnAddress = InetAddress.getByAddress(Payload.getPayloadElement(Payload.Element.IP_ADDRESS, payload));
+            int returnPort = ByteBuffer.wrap(Payload.getPayloadElement(Payload.Element.PORT, payload)).order(ByteOrder.LITTLE_ENDIAN).getInt();
+            InetAddress clientAddress = InetAddress.getByAddress(Payload.getPayloadElement(Payload.Element.CLIENT_IP_ADDRESS, payload));
+            int clientPort = ByteBuffer.wrap(Payload.getPayloadElement(Payload.Element.CLIENT_PORT, payload)).order(ByteOrder.LITTLE_ENDIAN).getInt();
+            byte[] actualPayload = Payload.getPayloadElement(Payload.Element.CLIENT_FORWARD_PAYLOAD, payload);
 
             // Get key from payload
             byte[] keyAsBytes = Payload.getPayloadElement(Payload.Element.KEY, actualPayload);
@@ -343,16 +395,22 @@ public class GETHandler {
 
                     if(self.getId() == keyRequestID) {
                         // Perform search in local kvstore
-                        packetToSend = performGetOperation(key, header, clientAddress, clientPort);
+                        packetToSend = performGetOperation(key, header, returnAddress, returnPort, clientAddress, clientPort);
                     } else {
-                        // Drop packet
-                        return null;
+                        // Build error packet
+                        byte[] stdPayload = Payload.buildPayloadWithOnlyCommand(ResponseCodes.INTERNAL_KVSTORE_FAILURE);
+                        byte[] newPayload = Payload.buildForwardingRequestPayload(ResponseCodes.CLIENT_FWD_RESPONSE, clientAddress, clientPort, stdPayload);
+                        byte[] newMessage = Message.buildMessage(header, newPayload);
+                        packetToSend = new DatagramPacket(newMessage, newMessage.length, returnAddress, returnPort);
                     }
                 }
                 // CASE 2) Null predecessor and empty successor list
                 else {
-                    // Drop packet
-                    return null;
+                    // Build error packet
+                    byte[] stdPayload = Payload.buildPayloadWithOnlyCommand(ResponseCodes.INTERNAL_KVSTORE_FAILURE);
+                    byte[] newPayload = Payload.buildForwardingRequestPayload(ResponseCodes.CLIENT_FWD_RESPONSE, clientAddress, clientPort, stdPayload);
+                    byte[] newMessage = Message.buildMessage(header, newPayload);
+                    packetToSend = new DatagramPacket(newMessage, newMessage.length, returnAddress, returnPort);
                 }
             }
             else {
@@ -363,11 +421,12 @@ public class GETHandler {
                     // ii) If not correct -> Send predecessor a potential ims get request
                     if(ImmediateSuccessorRouter.isSelfPotentialIMS(keyRequestID, predecessor.getId(), self.getId())) {
                         // Perform search in local kvstore
-                        packetToSend = performGetOperation(key, header, clientAddress, clientPort);
+                        packetToSend = performGetOperation(key, header, returnAddress, returnPort, clientAddress, clientPort);
 
                     } else {
                         // Prepare potential ims get request to send to predecessor
-                        byte[] newPayload = Payload.buildForwardingRequestPayload(RequestCodes.POTENTIAL_IMS_GET, clientAddress, clientPort, actualPayload);
+                        byte[] newPayload = Payload.buildClientForwardingRequestPayload(RequestCodes.POTENTIAL_IMS_GET,
+                                returnAddress, returnPort, clientAddress, clientPort, actualPayload);
                         byte[] newMessage = Message.buildMessage(header, newPayload);
                         packetToSend = new DatagramPacket(newMessage, newMessage.length, predecessor.getHostname(), predecessor.getReceivingPort());
                     }
@@ -395,7 +454,7 @@ public class GETHandler {
      * @param clientPort - Client port
      * @return
      */
-    protected static DatagramPacket performGetOperation(String key, byte[] header, InetAddress clientAddress,
+    protected static DatagramPacket performGetOperation(String key, byte[] header, InetAddress destinationAddress, int destinationPort, InetAddress clientAddress,
                                                         int clientPort) {
         DatagramPacket packet = null;
         byte[] payload = null;
@@ -410,20 +469,22 @@ public class GETHandler {
                     with response code: Operation Success */
 
             byte[] valueToBytes = UTF8StringUtility.stringToBytesUTF8(value);
-            payload = Payload.buildStandardResponsePayload(ResponseCodes.OPERATION_SUCCESS, valueToBytes);
+            byte[] stdPayload = Payload.buildStandardResponsePayload(ResponseCodes.OPERATION_SUCCESS, valueToBytes);
+            payload = Payload.buildForwardingRequestPayload(ResponseCodes.CLIENT_FWD_RESPONSE, clientAddress, clientPort, stdPayload);
 
         } catch(KVStoreKeyNotFoundException e) {
 
                 /* If key is not found in key-value store, build a response payload
                    with response code: Non-existent-key */
 
-            payload = Payload.buildPayloadWithOnlyCommand(ResponseCodes.NON_EXISTENT_KEY);
+            byte[] stdPayload = Payload.buildPayloadWithOnlyCommand(ResponseCodes.NON_EXISTENT_KEY);
+            payload = Payload.buildForwardingRequestPayload(ResponseCodes.CLIENT_FWD_RESPONSE, clientAddress, clientPort, stdPayload);
         }
 
-        if(payload != null && header != null) {
+        if(payload != null && header != null && destinationAddress != null) {
             try {
                 byte[] message = Message.buildMessage(header, payload);
-                packet = new DatagramPacket(message, message.length, clientAddress, clientPort);
+                packet = new DatagramPacket(message, message.length, destinationAddress, destinationPort);
             } catch(InvalidMessageException e) {
                 e.printStackTrace();
             }

@@ -58,7 +58,7 @@ public class PUTHandler {
 
                     if(self.getId() == keyRequestID) {
                         // Perform put operation on local kvstore
-                        packetToSend = performPutOperation(key, value, header, incomingPacket.getAddress(), incomingPacket.getPort());
+                        packetToSend = performPutOperation(key, value, header, self.getHostname(), self.getReceivingPort(), incomingPacket.getAddress(), incomingPacket.getPort());
                     } else {
                         int successorList[] = nlc.getSuccessorListIDs();
                         try {
@@ -67,24 +67,34 @@ public class PUTHandler {
                             Node potentialIMS = nlc.getNodeByID(potentialIMSID);
                             if(potentialIMS != null) {
                                 // Prepare potential ims put packet
-                                byte[] newPayload = Payload.buildForwardingRequestPayload(RequestCodes.POTENTIAL_IMS_PUT, incomingPacket.getAddress(), incomingPacket.getPort(), payload);
+                                byte[] newPayload = Payload.buildClientForwardingRequestPayload(
+                                        RequestCodes.POTENTIAL_IMS_PUT, self.getHostname(), self.getReceivingPort(),
+                                        incomingPacket.getAddress(), incomingPacket.getPort(), payload);
                                 byte[] newMessage = Message.buildMessage(header, newPayload);
                                 packetToSend = new DatagramPacket(newMessage, newMessage.length, potentialIMS.getHostname(), potentialIMS.getReceivingPort());
                             } else {
-                                // Drop packet
-                                return null;
+                                // Build error packet
+                                byte[] stdPayload = Payload.buildPayloadWithOnlyCommand(ResponseCodes.INTERNAL_KVSTORE_FAILURE);
+                                byte[] newPayload = Payload.buildForwardingRequestPayload(ResponseCodes.CLIENT_FWD_RESPONSE, incomingPacket.getAddress(), incomingPacket.getPort(), stdPayload);
+                                byte[] newMessage = Message.buildMessage(header, newPayload);
+                                packetToSend = new DatagramPacket(newMessage, newMessage.length, self.getHostname(), self.getReceivingPort());
                             }
                         } catch(NoPotentialIMSException e) {
                             // Get last successor
                             Node lastSuccessor = nlc.getLastSuccessor();
                             if(lastSuccessor != null) {
                                 // Prepare forward put packet
-                                byte[] newPayload = Payload.buildForwardingRequestPayload(RequestCodes.FWD_PUT, incomingPacket.getAddress(), incomingPacket.getPort(), payload);
+                                byte[] newPayload = Payload.buildClientForwardingRequestPayload(RequestCodes.FWD_PUT,
+                                        self.getHostname(), self.getReceivingPort(), incomingPacket.getAddress(),
+                                        incomingPacket.getPort(), payload);
                                 byte[] newMessage = Message.buildMessage(header, newPayload);
                                 packetToSend = new DatagramPacket(newMessage, newMessage.length, lastSuccessor.getHostname(), lastSuccessor.getReceivingPort());
                             } else {
-                                // Drop packet
-                                return null;
+                                // Build error packet
+                                byte[] stdPayload = Payload.buildPayloadWithOnlyCommand(ResponseCodes.INTERNAL_KVSTORE_FAILURE);
+                                byte[] newPayload = Payload.buildForwardingRequestPayload(ResponseCodes.CLIENT_FWD_RESPONSE, incomingPacket.getAddress(), incomingPacket.getPort(), stdPayload);
+                                byte[] newMessage = Message.buildMessage(header, newPayload);
+                                packetToSend = new DatagramPacket(newMessage, newMessage.length, self.getHostname(), self.getReceivingPort());
                             }
                         }
                     }
@@ -94,7 +104,7 @@ public class PUTHandler {
                     Timestamp timestamp = Timestamp.getInstance();
                     if(self.getId() == keyRequestID) { // || (timestamp.getPredecessorCheckTimestamp() == null && timestamp.getSuccessorCheckTimestamp() == null)) {
                         // Perform put operation on local kvstore
-                        packetToSend = performPutOperation(key, value, header, incomingPacket.getAddress(), incomingPacket.getPort());
+                        packetToSend = performPutOperation(key, value, header, self.getHostname(), self.getReceivingPort(), incomingPacket.getAddress(), incomingPacket.getPort());
                     } else {
 
 
@@ -110,7 +120,7 @@ public class PUTHandler {
                     // iii) If potential ims found in successor list -> Send potential ims request to element
                     if(ImmediateSuccessorRouter.isSelfPotentialIMS(keyRequestID, predecessor.getId(), self.getId())) {
                         // Perform put operation on local kvstore
-                        packetToSend = performPutOperation(key, value, header, incomingPacket.getAddress(), incomingPacket.getPort());
+                        packetToSend = performPutOperation(key, value, header, self.getHostname(), self.getReceivingPort(), incomingPacket.getAddress(), incomingPacket.getPort());
                     } else {
                         int successorList[] = nlc.getSuccessorListIDs();
                         try {
@@ -118,32 +128,45 @@ public class PUTHandler {
                             Node potentialIMS = nlc.getNodeByID(potentialIMSID);
                             if(potentialIMS != null) {
                                 // Prepare potential ims put packet
-                                byte[] newPayload = Payload.buildForwardingRequestPayload(RequestCodes.POTENTIAL_IMS_PUT, incomingPacket.getAddress(), incomingPacket.getPort(), payload);
+                                byte[] newPayload = Payload.buildClientForwardingRequestPayload(
+                                        RequestCodes.POTENTIAL_IMS_PUT, self.getHostname(), self.getReceivingPort(),
+                                        incomingPacket.getAddress(), incomingPacket.getPort(), payload);
                                 byte[] newMessage = Message.buildMessage(header, newPayload);
                                 packetToSend = new DatagramPacket(newMessage, newMessage.length, potentialIMS.getHostname(), potentialIMS.getReceivingPort());
                             } else {
-                                // Drop packet
-                                return null;
+                                // Build error packet
+                                byte[] stdPayload = Payload.buildPayloadWithOnlyCommand(ResponseCodes.INTERNAL_KVSTORE_FAILURE);
+                                byte[] newPayload = Payload.buildForwardingRequestPayload(ResponseCodes.CLIENT_FWD_RESPONSE, incomingPacket.getAddress(), incomingPacket.getPort(), stdPayload);
+                                byte[] newMessage = Message.buildMessage(header, newPayload);
+                                packetToSend = new DatagramPacket(newMessage, newMessage.length, self.getHostname(), self.getReceivingPort());
                             }
                         } catch(NoPotentialIMSException e) {
                             // Get last successor
                             Node lastSuccessor = nlc.getLastSuccessor();
                             if(lastSuccessor != null) {
                                 // Prepare forward put packet
-                                byte[] newPayload = Payload.buildForwardingRequestPayload(RequestCodes.FWD_PUT, incomingPacket.getAddress(), incomingPacket.getPort(), payload);
+                                byte[] newPayload = Payload.buildClientForwardingRequestPayload(RequestCodes.FWD_PUT,
+                                        self.getHostname(), self.getReceivingPort(), incomingPacket.getAddress(),
+                                        incomingPacket.getPort(), payload);
                                 byte[] newMessage = Message.buildMessage(header, newPayload);
                                 packetToSend = new DatagramPacket(newMessage, newMessage.length, lastSuccessor.getHostname(), lastSuccessor.getReceivingPort());
                             } else {
-                                // Drop packet
-                                return null;
+                                // Build error packet
+                                byte[] stdPayload = Payload.buildPayloadWithOnlyCommand(ResponseCodes.INTERNAL_KVSTORE_FAILURE);
+                                byte[] newPayload = Payload.buildForwardingRequestPayload(ResponseCodes.CLIENT_FWD_RESPONSE, incomingPacket.getAddress(), incomingPacket.getPort(), stdPayload);
+                                byte[] newMessage = Message.buildMessage(header, newPayload);
+                                packetToSend = new DatagramPacket(newMessage, newMessage.length, self.getHostname(), self.getReceivingPort());
                             }
                         }
                     }
                 }
                 // CASE 4) Predecessor set and empty successor list
                 else {
-                    // Drop packet
-                    return null;
+                    // Build error packet
+                    byte[] stdPayload = Payload.buildPayloadWithOnlyCommand(ResponseCodes.INTERNAL_KVSTORE_FAILURE);
+                    byte[] newPayload = Payload.buildForwardingRequestPayload(ResponseCodes.CLIENT_FWD_RESPONSE, incomingPacket.getAddress(), incomingPacket.getPort(), stdPayload);
+                    byte[] newMessage = Message.buildMessage(header, newPayload);
+                    packetToSend = new DatagramPacket(newMessage, newMessage.length, self.getHostname(), self.getReceivingPort());
                 }
             }
 
@@ -175,9 +198,11 @@ public class PUTHandler {
 
         try {
             // Get actual payload
-            InetAddress clientAddress = InetAddress.getByAddress(Payload.getPayloadElement(Payload.Element.IP_ADDRESS, payload));
-            int clientPort = ByteBuffer.wrap(Payload.getPayloadElement(Payload.Element.PORT, payload)).order(ByteOrder.LITTLE_ENDIAN).getInt();
-            byte[] actualPayload = Payload.getPayloadElement(Payload.Element.ACTUAL_PAYLOAD, payload);
+            InetAddress returnAddress = InetAddress.getByAddress(Payload.getPayloadElement(Payload.Element.IP_ADDRESS, payload));
+            int returnPort = ByteBuffer.wrap(Payload.getPayloadElement(Payload.Element.PORT, payload)).order(ByteOrder.LITTLE_ENDIAN).getInt();
+            InetAddress clientAddress = InetAddress.getByAddress(Payload.getPayloadElement(Payload.Element.CLIENT_IP_ADDRESS, payload));
+            int clientPort = ByteBuffer.wrap(Payload.getPayloadElement(Payload.Element.CLIENT_PORT, payload)).order(ByteOrder.LITTLE_ENDIAN).getInt();
+            byte[] actualPayload = Payload.getPayloadElement(Payload.Element.CLIENT_FORWARD_PAYLOAD, payload);
 
             // Get key from payload
             byte[] keyAsBytes = Payload.getPayloadElement(Payload.Element.KEY, actualPayload);
@@ -201,7 +226,7 @@ public class PUTHandler {
 
                     if(self.getId() == keyRequestID) {
                         // Perform put operation on local kvstore
-                        packetToSend = performPutOperation(key, value, header, clientAddress, clientPort);
+                        packetToSend = performPutOperation(key, value, header, returnAddress, returnPort, clientAddress, clientPort);
                     } else {
                         int successorList[] = nlc.getSuccessorListIDs();
                         try {
@@ -209,32 +234,44 @@ public class PUTHandler {
                             Node potentialIMS = nlc.getNodeByID(potentialIMSID);
                             if(potentialIMS != null) {
                                 // Prepare potential ims put packet
-                                byte[] newPayload = Payload.buildForwardingRequestPayload(RequestCodes.POTENTIAL_IMS_PUT, clientAddress, clientPort, actualPayload);
+                                byte[] newPayload = Payload.buildClientForwardingRequestPayload(
+                                        RequestCodes.POTENTIAL_IMS_PUT, returnAddress, returnPort, clientAddress,
+                                        clientPort, actualPayload);
                                 byte[] newMessage = Message.buildMessage(header, newPayload);
                                 packetToSend = new DatagramPacket(newMessage, newMessage.length, potentialIMS.getHostname(), potentialIMS.getReceivingPort());
                             } else {
-                                // Drop packet
-                                return null;
+                                // Build error packet
+                                byte[] stdPayload = Payload.buildPayloadWithOnlyCommand(ResponseCodes.INTERNAL_KVSTORE_FAILURE);
+                                byte[] newPayload = Payload.buildForwardingRequestPayload(ResponseCodes.CLIENT_FWD_RESPONSE, clientAddress, clientPort, stdPayload);
+                                byte[] newMessage = Message.buildMessage(header, newPayload);
+                                packetToSend = new DatagramPacket(newMessage, newMessage.length, returnAddress, returnPort);
                             }
                         } catch(NoPotentialIMSException e) {
                             // Get last successor
                             Node lastSuccessor = nlc.getLastSuccessor();
                             if(lastSuccessor != null) {
                                 // Prepare forward put packet
-                                byte[] newPayload = Payload.buildForwardingRequestPayload(RequestCodes.FWD_PUT, clientAddress, clientPort, actualPayload);
+                                byte[] newPayload = Payload.buildClientForwardingRequestPayload(RequestCodes.FWD_PUT,
+                                        returnAddress, returnPort, clientAddress, clientPort, actualPayload);
                                 byte[] newMessage = Message.buildMessage(header, newPayload);
                                 packetToSend = new DatagramPacket(newMessage, newMessage.length, lastSuccessor.getHostname(), lastSuccessor.getReceivingPort());
                             } else {
-                                // Drop packet
-                                return null;
+                                // Build error packet
+                                byte[] stdPayload = Payload.buildPayloadWithOnlyCommand(ResponseCodes.INTERNAL_KVSTORE_FAILURE);
+                                byte[] newPayload = Payload.buildForwardingRequestPayload(ResponseCodes.CLIENT_FWD_RESPONSE, clientAddress, clientPort, stdPayload);
+                                byte[] newMessage = Message.buildMessage(header, newPayload);
+                                packetToSend = new DatagramPacket(newMessage, newMessage.length, returnAddress, returnPort);
                             }
                         }
                     }
                 }
                 // CASE 2) Null predecessor and empty successor list
                 else {
-                    // Drop packet
-                    return null;
+                    // Build error packet
+                    byte[] stdPayload = Payload.buildPayloadWithOnlyCommand(ResponseCodes.INTERNAL_KVSTORE_FAILURE);
+                    byte[] newPayload = Payload.buildForwardingRequestPayload(ResponseCodes.CLIENT_FWD_RESPONSE, clientAddress, clientPort, stdPayload);
+                    byte[] newMessage = Message.buildMessage(header, newPayload);
+                    packetToSend = new DatagramPacket(newMessage, newMessage.length, returnAddress, returnPort);
                 }
             }
             else {
@@ -246,7 +283,7 @@ public class PUTHandler {
                     // iii) If potential ims found in successor list -> Send potential ims request to element
                     if(self.getId() == keyRequestID) {
                         // Perform put operation on local kvstore
-                        packetToSend = performPutOperation(key, value, header, clientAddress, clientPort);
+                        packetToSend = performPutOperation(key, value, header, returnAddress, returnPort, clientAddress, clientPort);
                     } else {
                         int successorList[] = nlc.getSuccessorListIDs();
                         try {
@@ -254,32 +291,44 @@ public class PUTHandler {
                             Node potentialIMS = nlc.getNodeByID(potentialIMSID);
                             if(potentialIMS != null) {
                                 // Prepare potential ims put packet
-                                byte[] newPayload = Payload.buildForwardingRequestPayload(RequestCodes.POTENTIAL_IMS_PUT, clientAddress, clientPort, actualPayload);
+                                byte[] newPayload = Payload.buildClientForwardingRequestPayload(
+                                        RequestCodes.POTENTIAL_IMS_PUT, returnAddress, returnPort, clientAddress,
+                                        clientPort, actualPayload);
                                 byte[] newMessage = Message.buildMessage(header, newPayload);
                                 packetToSend = new DatagramPacket(newMessage, newMessage.length, potentialIMS.getHostname(), potentialIMS.getReceivingPort());
                             } else {
-                                // Drop packet
-                                return null;
+                                // Build error packet
+                                byte[] stdPayload = Payload.buildPayloadWithOnlyCommand(ResponseCodes.INTERNAL_KVSTORE_FAILURE);
+                                byte[] newPayload = Payload.buildForwardingRequestPayload(ResponseCodes.CLIENT_FWD_RESPONSE, clientAddress, clientPort, stdPayload);
+                                byte[] newMessage = Message.buildMessage(header, newPayload);
+                                packetToSend = new DatagramPacket(newMessage, newMessage.length, returnAddress, returnPort);
                             }
                         } catch(NoPotentialIMSException e) {
                             // Get last successor
                             Node lastSuccessor = nlc.getLastSuccessor();
                             if(lastSuccessor != null) {
                                 // Prepare forward put packet
-                                byte[] newPayload = Payload.buildForwardingRequestPayload(RequestCodes.FWD_PUT, clientAddress, clientPort, actualPayload);
+                                byte[] newPayload = Payload.buildClientForwardingRequestPayload(RequestCodes.FWD_PUT,
+                                        returnAddress, returnPort, clientAddress, clientPort, actualPayload);
                                 byte[] newMessage = Message.buildMessage(header, newPayload);
                                 packetToSend = new DatagramPacket(newMessage, newMessage.length, lastSuccessor.getHostname(), lastSuccessor.getReceivingPort());
                             } else {
-                                // Drop packet
-                                return null;
+                                // Build error packet
+                                byte[] stdPayload = Payload.buildPayloadWithOnlyCommand(ResponseCodes.INTERNAL_KVSTORE_FAILURE);
+                                byte[] newPayload = Payload.buildForwardingRequestPayload(ResponseCodes.CLIENT_FWD_RESPONSE, clientAddress, clientPort, stdPayload);
+                                byte[] newMessage = Message.buildMessage(header, newPayload);
+                                packetToSend = new DatagramPacket(newMessage, newMessage.length, returnAddress, returnPort);
                             }
                         }
                     }
                 }
                 // CASE 4) Predecessor set and empty successor list
                 else {
-                    // Drop packet
-                    return null;
+                    // Build error packet
+                    byte[] stdPayload = Payload.buildPayloadWithOnlyCommand(ResponseCodes.INTERNAL_KVSTORE_FAILURE);
+                    byte[] newPayload = Payload.buildForwardingRequestPayload(ResponseCodes.CLIENT_FWD_RESPONSE, clientAddress, clientPort, stdPayload);
+                    byte[] newMessage = Message.buildMessage(header, newPayload);
+                    packetToSend = new DatagramPacket(newMessage, newMessage.length, returnAddress, returnPort);
                 }
             }
 
@@ -316,7 +365,7 @@ public class PUTHandler {
             String value = UTF8StringUtility.bytesUTF8ToString(Payload.getPayloadElement(Payload.Element.REQUEST_VALUE, payload));
 
             // Perform a put operation
-            performPutOperation(key, value, null, null, -1);
+            performPutOperation(key, value, null, null, -1, null, -1);
 
 
         } catch(Exception e) {
@@ -343,9 +392,11 @@ public class PUTHandler {
 
         try {
             // Get actual payload
-            InetAddress clientAddress = InetAddress.getByAddress(Payload.getPayloadElement(Payload.Element.IP_ADDRESS, payload));
-            int clientPort = ByteBuffer.wrap(Payload.getPayloadElement(Payload.Element.PORT, payload)).order(ByteOrder.LITTLE_ENDIAN).getInt();
-            byte[] actualPayload = Payload.getPayloadElement(Payload.Element.ACTUAL_PAYLOAD, payload);
+            InetAddress returnAddress = InetAddress.getByAddress(Payload.getPayloadElement(Payload.Element.IP_ADDRESS, payload));
+            int returnPort = ByteBuffer.wrap(Payload.getPayloadElement(Payload.Element.PORT, payload)).order(ByteOrder.LITTLE_ENDIAN).getInt();
+            InetAddress clientAddress = InetAddress.getByAddress(Payload.getPayloadElement(Payload.Element.CLIENT_IP_ADDRESS, payload));
+            int clientPort = ByteBuffer.wrap(Payload.getPayloadElement(Payload.Element.CLIENT_PORT, payload)).order(ByteOrder.LITTLE_ENDIAN).getInt();
+            byte[] actualPayload = Payload.getPayloadElement(Payload.Element.CLIENT_FORWARD_PAYLOAD, payload);
 
             // Get key from payload
             byte[] keyAsBytes = Payload.getPayloadElement(Payload.Element.KEY, actualPayload);
@@ -369,16 +420,22 @@ public class PUTHandler {
 
                     if(self.getId() == keyRequestID) {
                         // Perform put operation on local kvstore
-                        packetToSend = performPutOperation(key, value, header, clientAddress, clientPort);
+                        packetToSend = performPutOperation(key, value, header, returnAddress, returnPort, clientAddress, clientPort);
                     } else {
-                        // Drop packet
-                        return null;
+                        // Build error packet
+                        byte[] stdPayload = Payload.buildPayloadWithOnlyCommand(ResponseCodes.INTERNAL_KVSTORE_FAILURE);
+                        byte[] newPayload = Payload.buildForwardingRequestPayload(ResponseCodes.CLIENT_FWD_RESPONSE, clientAddress, clientPort, stdPayload);
+                        byte[] newMessage = Message.buildMessage(header, newPayload);
+                        packetToSend = new DatagramPacket(newMessage, newMessage.length, returnAddress, returnPort);
                     }
                 }
                 // CASE 2) Null predecessor and empty successor list
                 else {
-                    // Drop packet
-                    return null;
+                    // Build error packet
+                    byte[] stdPayload = Payload.buildPayloadWithOnlyCommand(ResponseCodes.INTERNAL_KVSTORE_FAILURE);
+                    byte[] newPayload = Payload.buildForwardingRequestPayload(ResponseCodes.CLIENT_FWD_RESPONSE, clientAddress, clientPort, stdPayload);
+                    byte[] newMessage = Message.buildMessage(header, newPayload);
+                    packetToSend = new DatagramPacket(newMessage, newMessage.length, returnAddress, returnPort);
                 }
             }
             else {
@@ -389,12 +446,13 @@ public class PUTHandler {
                     // ii) If not correct -> Send predecessor a potential ims put request
                     if(ImmediateSuccessorRouter.isSelfPotentialIMS(keyRequestID, predecessor.getId(), self.getId())) {
                         // Perform put operation on local kvstore
-                        packetToSend = performPutOperation(key, value, header, clientAddress, clientPort);
+                        packetToSend = performPutOperation(key, value, header, returnAddress, returnPort, clientAddress, clientPort);
 
 
                     } else {
                         // Prepare potential ims put request to send to predecessor
-                        byte[] newPayload = Payload.buildForwardingRequestPayload(RequestCodes.POTENTIAL_IMS_PUT, clientAddress, clientPort, actualPayload);
+                        byte[] newPayload = Payload.buildClientForwardingRequestPayload(RequestCodes.POTENTIAL_IMS_PUT,
+                                returnAddress, returnPort, clientAddress, clientPort, actualPayload);
                         byte[] newMessage = Message.buildMessage(header, newPayload);
                         packetToSend = new DatagramPacket(newMessage, newMessage.length, predecessor.getHostname(), predecessor.getReceivingPort());
                     }
@@ -424,7 +482,7 @@ public class PUTHandler {
      * @param clientPort - Client port
      * @return
      */
-    protected static DatagramPacket performPutOperation(String key, String value, byte[] header, InetAddress clientAddress, int clientPort) {
+    protected static DatagramPacket performPutOperation(String key, String value, byte[] header, InetAddress destinationAddress, int destinationPort, InetAddress clientAddress, int clientPort) {
         DatagramPacket packet = null;
         byte[] payload = null;
 
@@ -437,7 +495,8 @@ public class PUTHandler {
             /* If key was put in key-value store, build a response payload
                with response code: Operation Success */
 
-            payload = Payload.buildPayloadWithOnlyCommand(ResponseCodes.OPERATION_SUCCESS);
+            byte[] stdPayload = Payload.buildPayloadWithOnlyCommand(ResponseCodes.OPERATION_SUCCESS);
+            payload = Payload.buildForwardingRequestPayload(ResponseCodes.CLIENT_FWD_RESPONSE, clientAddress, clientPort, stdPayload);
             System.out.println("PUT operation succeeded");
 
             // Forward to replicas only if <key, value> was inserted
@@ -448,7 +507,8 @@ public class PUTHandler {
             /* If key-value store is full, build a response payload
                with response code: Out of Space */
 
-            payload = Payload.buildPayloadWithOnlyCommand(ResponseCodes.OUT_OF_SPACE);
+            byte[] stdPayload = Payload.buildPayloadWithOnlyCommand(ResponseCodes.OUT_OF_SPACE);
+            payload = Payload.buildForwardingRequestPayload(ResponseCodes.CLIENT_FWD_RESPONSE, clientAddress, clientPort, stdPayload);
             System.out.println("PUT operation failed - out of space");
 
         } catch(KVStoreInvalidKeyOrValueFormatException e) {
@@ -456,14 +516,15 @@ public class PUTHandler {
             /* If key or value is in wrong format, build a response payload
                with response code: Internal KVStore Failure */
 
-            payload = Payload.buildPayloadWithOnlyCommand(ResponseCodes.INTERNAL_KVSTORE_FAILURE);
+            byte[] stdPayload = Payload.buildPayloadWithOnlyCommand(ResponseCodes.INTERNAL_KVSTORE_FAILURE);
+            payload = Payload.buildForwardingRequestPayload(ResponseCodes.CLIENT_FWD_RESPONSE, clientAddress, clientPort, stdPayload);
             System.out.println("PUT operation failed - Internal KV Store Failure");
         }
 
-        if(payload != null && header != null) {
+        if(payload != null && header != null && destinationAddress != null) {
             try {
                 byte[] message = Message.buildMessage(header, payload);
-                packet = new DatagramPacket(message, message.length, clientAddress, clientPort);
+                packet = new DatagramPacket(message, message.length, destinationAddress, destinationPort);
             } catch(InvalidMessageException e) {
                 e.printStackTrace();
             }
