@@ -2,6 +2,8 @@ package command;
 
 import algorithm.ImmediateSuccessorRouter;
 import algorithm.NoPotentialIMSException;
+import cache.CacheController;
+import cache.CacheEntry;
 import kvstore.KVStoreController;
 import kvstore.KVStoreKeyNotFoundException;
 import message.BadValueLengthException;
@@ -457,10 +459,9 @@ public class GETHandler {
         try {
             // Attempt to get value for input key from key value store
             String value = kvStoreController.get(key);
-//            cacheController.add(ce);
 
-                /* If key was found in key-value store, build a response payload with value and
-                    with response code: Operation Success */
+            /* If key was found in key-value store, build a response payload with value and
+                with response code: Operation Success */
 
             byte[] valueToBytes = UTF8StringUtility.stringToBytesUTF8(value);
             byte[] stdPayload = Payload.buildStandardResponsePayload(ResponseCodes.OPERATION_SUCCESS, valueToBytes);

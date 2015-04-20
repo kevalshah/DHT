@@ -2,6 +2,8 @@ package command;
 
 import algorithm.ImmediateSuccessorRouter;
 import algorithm.NoPotentialIMSException;
+import cache.CacheController;
+import cache.CacheEntry;
 import kvstore.KVStoreController;
 import kvstore.KVStoreKeyNotFoundException;
 import message.BadValueLengthException;
@@ -10,6 +12,7 @@ import message.Message;
 import message.Payload;
 import nodelist.Node;
 import nodelist.NodeListController;
+import protocol.ReplicaForward;
 import timestamp.Timestamp;
 import utility.HashUtility;
 import utility.UTF8StringUtility;
@@ -462,11 +465,33 @@ public class REMOVEHandler {
         DatagramPacket packet = null;
         byte[] payload = null;
 
+        CacheController cacheController = CacheController.getInstance();
         KVStoreController kvStoreController = KVStoreController.getInstance();
         try {
+
+            CacheEntry cacheEntry = cacheController.isUniqueIDInCache(header);
+            if(cacheEntry == null) {
+                // Add new cache entry
+                cacheController.addToCache(header);
+            }
+            else {
+                // If cache entry was found, check if expired
+                if(cacheEntry.isExpired()) {
+                    // If expired, remove from cache and add new cache entry
+                    cacheController.removeAllExpiredEntries();
+                    cacheController.addToCache(header);
+                } else {
+                    // If not expired - build error packet as request has already been serviced
+
+                    // For now returning null
+                    return null;
+                }
+
+            }
+
+
             // Attempt to remove key-value pair from key value store
             kvStoreController.remove(key);
-//            cacheController.add(ce);
 
             /* If key was removed from key-value store, build a response payload
                with response code: Operation Success */
@@ -476,7 +501,7 @@ public class REMOVEHandler {
 //            System.out.println("REMOVE operation succeeded");
 
             // Forward to replicas only if <key, value> was removed
-//            ReplicaForward.forwardREMOVEToReplica(header, keyAsBytes);
+            ReplicaForward.forwardREMOVEToReplica(header, key);
 
         } catch(KVStoreKeyNotFoundException e) {
 
