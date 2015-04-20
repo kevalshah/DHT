@@ -42,7 +42,7 @@ public class REMOVEHandler {
             byte[] keyAsBytes = Payload.getPayloadElement(Payload.Element.KEY, payload);
             String key = UTF8StringUtility.bytesUTF8ToString(keyAsBytes);
 
-            int keyRequestID = HashUtility.hashString(key);
+            int keyRequestID = HashUtility.simpleHash(key, HashUtility.DEFAULT_HASH_RANGE);
 
             Node predecessor = nlc.getPredecessor();
             Node self = nlc.getSelf();
@@ -98,14 +98,8 @@ public class REMOVEHandler {
                 }
                 // CASE 2) Null predecessor and empty successor list
                 else {
-                    Timestamp timestamp = Timestamp.getInstance();
-                    if(self.getId() == keyRequestID) {// || (timestamp.getPredecessorCheckTimestamp() == null && timestamp.getSuccessorCheckTimestamp() == null)) {
-                        // Perform remove operation on local kvstore
-                        packetToSend = performRemoveOperation(key, header, self.getHostname(), self.getReceivingPort(), incomingPacket.getAddress(), incomingPacket.getPort());
-                    } else {
-
-
-                    }
+                    // Perform remove operation on local kvstore
+                    packetToSend = performRemoveOperation(key, header, self.getHostname(), self.getReceivingPort(), incomingPacket.getAddress(), incomingPacket.getPort());
                 }
             }
             else {
@@ -204,7 +198,7 @@ public class REMOVEHandler {
             // Get key from payload
             byte[] keyAsBytes = Payload.getPayloadElement(Payload.Element.KEY, actualPayload);
             String key = UTF8StringUtility.bytesUTF8ToString(keyAsBytes);
-            int keyRequestID = HashUtility.hashString(key);
+            int keyRequestID = HashUtility.simpleHash(key, HashUtility.DEFAULT_HASH_RANGE);
 
             // Get predecessor and self
             Node predecessor = nlc.getPredecessor();
@@ -388,7 +382,7 @@ public class REMOVEHandler {
             // Get key from payload
             byte[] keyAsBytes = Payload.getPayloadElement(Payload.Element.KEY, actualPayload);
             String key = UTF8StringUtility.bytesUTF8ToString(keyAsBytes);
-            int keyRequestID = HashUtility.hashString(key);
+            int keyRequestID = HashUtility.simpleHash(key, HashUtility.DEFAULT_HASH_RANGE);
 
             // Get predecessor and self
             Node predecessor = nlc.getPredecessor();

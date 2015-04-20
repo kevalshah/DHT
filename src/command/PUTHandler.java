@@ -40,7 +40,7 @@ public class PUTHandler {
             // Get key from payload
             byte[] keyAsBytes = Payload.getPayloadElement(Payload.Element.KEY, payload);
             String key = UTF8StringUtility.bytesUTF8ToString(keyAsBytes);
-            int keyRequestID = HashUtility.hashString(key);
+            int keyRequestID = HashUtility.simpleHash(key, HashUtility.DEFAULT_HASH_RANGE);
 
             // Get value from payload
             byte[] valueAsBytes = Payload.getPayloadElement(Payload.Element.REQUEST_VALUE, payload);
@@ -101,14 +101,8 @@ public class PUTHandler {
                 }
                 // CASE 2) Null predecessor and empty successor list
                 else {
-                    Timestamp timestamp = Timestamp.getInstance();
-                    if(self.getId() == keyRequestID) { // || (timestamp.getPredecessorCheckTimestamp() == null && timestamp.getSuccessorCheckTimestamp() == null)) {
-                        // Perform put operation on local kvstore
-                        packetToSend = performPutOperation(key, value, header, self.getHostname(), self.getReceivingPort(), incomingPacket.getAddress(), incomingPacket.getPort());
-                    } else {
-
-
-                    }
+                    // Perform put operation on local kvstore
+                    packetToSend = performPutOperation(key, value, header, self.getHostname(), self.getReceivingPort(), incomingPacket.getAddress(), incomingPacket.getPort());
                 }
             }
             else {
@@ -207,7 +201,7 @@ public class PUTHandler {
             // Get key from payload
             byte[] keyAsBytes = Payload.getPayloadElement(Payload.Element.KEY, actualPayload);
             String key = UTF8StringUtility.bytesUTF8ToString(keyAsBytes);
-            int keyRequestID = HashUtility.hashString(key);
+            int keyRequestID = HashUtility.simpleHash(key, HashUtility.DEFAULT_HASH_RANGE);
 
             // Get value from payload
             byte[] valueAsBytes = Payload.getPayloadElement(Payload.Element.REQUEST_VALUE, actualPayload);
@@ -401,7 +395,7 @@ public class PUTHandler {
             // Get key from payload
             byte[] keyAsBytes = Payload.getPayloadElement(Payload.Element.KEY, actualPayload);
             String key = UTF8StringUtility.bytesUTF8ToString(keyAsBytes);
-            int keyRequestID = HashUtility.hashString(key);
+            int keyRequestID = HashUtility.simpleHash(key, HashUtility.DEFAULT_HASH_RANGE);
 
             // Get value from payload
             byte[] valueAsBytes = Payload.getPayloadElement(Payload.Element.REQUEST_VALUE, actualPayload);

@@ -2,6 +2,9 @@ package utility;
 
 public class HashUtility {
 
+    public final static int DEFAULT_HASH_RANGE = 550;
+
+
     /**
      * Hashes a string to a positive integer
      * @param stringToHash - String to hash

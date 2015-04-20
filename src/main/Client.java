@@ -471,7 +471,7 @@ public class Client {
                         }
 
                         try {
-                            System.out.println("KEY ID: " + HashUtility.hashString(key));
+                            System.out.println("KEY ID: " + HashUtility.simpleHash(key, HashUtility.DEFAULT_HASH_RANGE));
                             put(convertKeyToByteRepresentation(
                                     key), UTF8StringUtility.stringToBytesUTF8(value));
                         } catch(InvalidMessageException e) {
@@ -491,7 +491,7 @@ public class Client {
                         }
 
                         try {
-                            System.out.println("KEY ID: " + HashUtility.hashString(key));
+                            System.out.println("KEY ID: " + HashUtility.simpleHash(key, HashUtility.DEFAULT_HASH_RANGE));
                             get(convertKeyToByteRepresentation(key));
                         } catch(InvalidMessageException e) {
                             System.out.println("ERROR: Client-side error. Operation could not complete successfully.");
@@ -509,7 +509,7 @@ public class Client {
                         }
 
                         try {
-                            System.out.println("KEY ID: " + HashUtility.hashString(key));
+                            System.out.println("KEY ID: " + HashUtility.simpleHash(key, HashUtility.DEFAULT_HASH_RANGE));
                             remove(convertKeyToByteRepresentation(key));
                         } catch(InvalidMessageException e) {
                             System.out.println("ERROR: Client-side error. Operation could not complete successfully.");

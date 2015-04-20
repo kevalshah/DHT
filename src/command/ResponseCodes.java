@@ -27,5 +27,14 @@ public class ResponseCodes {
     // Cannot be initialized
     private ResponseCodes() {}
 
+    public static boolean isRecognizedResponseCode(byte code) {
+        if((OPERATION_SUCCESS <= code && code <= UNRECOGNIZED_COMMAND) ||
+                (JOIN_REP <= code && code <= NODE_LIST_RESPONSE)) {
+            return true;
+        }
+
+        return false;
+    }
+
 
 }

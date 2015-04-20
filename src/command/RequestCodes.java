@@ -33,4 +33,15 @@ public class RequestCodes {
 
     // Cannot be initialized
     private RequestCodes() {}
+
+    public static boolean isRecognizedRequestCode(byte code) {
+        if((PUT <= code && code <= SHUTDOWN) ||
+                (FWD_PUT <= code && code <= NODE_LIST_REQUEST)) {
+            return true;
+        }
+
+        return false;
+    }
+
+
 }
