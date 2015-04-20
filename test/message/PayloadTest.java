@@ -193,16 +193,16 @@ public class PayloadTest {
         assertEquals(Payload.COMMAND_CODE_SIZE_BYTES + Payload.IP_SIZE_BYTES + Payload.PORT_SIZE_BYTES + Payload.ACTUAL_PAYLOAD_LENGTH_SIZE_BYTES + originalRequestPayload.length, forwardingRequestPayload.length);
 
         // Check if contents are as expected
-        byte[] extractedIPAsBytes = Arrays.copyOfRange(forwardingRequestPayload, Payload.IP_START_INDEX, Payload.IP_START_INDEX + Payload.IP_SIZE_BYTES);
+        byte[] extractedIPAsBytes = Arrays.copyOfRange(forwardingRequestPayload, Payload.REGULAR_FORWARD_RETURN_IP_START_INDEX, Payload.REGULAR_FORWARD_RETURN_IP_START_INDEX + Payload.IP_SIZE_BYTES);
         assertEquals(ip, InetAddress.getByAddress(extractedIPAsBytes));
 
-        byte[] extractedPortAsBytes = Arrays.copyOfRange(forwardingRequestPayload, Payload.PORT_START_INDEX, Payload.PORT_START_INDEX + Payload.PORT_SIZE_BYTES);
+        byte[] extractedPortAsBytes = Arrays.copyOfRange(forwardingRequestPayload, Payload.REGULAR_FORWARD_RETURN_PORT_START_INDEX, Payload.REGULAR_FORWARD_RETURN_PORT_START_INDEX + Payload.PORT_SIZE_BYTES);
         assertEquals(port, ByteBuffer.wrap(extractedPortAsBytes).order(ByteOrder.LITTLE_ENDIAN).getInt());
 
-        byte[] extractedOriginalPayloadLength = Arrays.copyOfRange(forwardingRequestPayload, Payload.ACTUAL_PAYLOAD_LENGTH_START_INDEX, Payload.ACTUAL_PAYLOAD_LENGTH_START_INDEX + Payload.ACTUAL_PAYLOAD_LENGTH_SIZE_BYTES);
+        byte[] extractedOriginalPayloadLength = Arrays.copyOfRange(forwardingRequestPayload, Payload.REGULAR_FORWARD_PAYLOAD_LENGTH_START_INDEX, Payload.REGULAR_FORWARD_PAYLOAD_LENGTH_START_INDEX + Payload.ACTUAL_PAYLOAD_LENGTH_SIZE_BYTES);
         assertEquals(originalRequestPayload.length, ByteBuffer.wrap(extractedOriginalPayloadLength).order(ByteOrder.LITTLE_ENDIAN).getInt());
 
-        byte[] extractedOriginalPayload = Arrays.copyOfRange(forwardingRequestPayload, Payload.ACTUAL_PAYLOAD_START_INDEX, forwardingRequestPayload.length);
+        byte[] extractedOriginalPayload = Arrays.copyOfRange(forwardingRequestPayload, Payload.REGULAR_FORWARD_PAYLOAD_START_INDEX, forwardingRequestPayload.length);
         assertArrayEquals(originalRequestPayload, extractedOriginalPayload);
     }
 
